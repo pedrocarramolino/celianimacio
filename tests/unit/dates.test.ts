@@ -60,3 +60,15 @@ test("solapes de intervalos (extremos no solapan)", () => {
   assert.ok(!intervalsOverlap(a, b, b, c));
   assert.ok(intervalsOverlap(a, c, b, c));
 });
+
+import { addMonthsISO, monthEndISO, monthGridISO } from "../../utils/dates";
+
+test("cuadrícula mensual en semanas completas", () => {
+  const grid = monthGridISO("2026-11-17"); // noviembre 2026 empieza en domingo
+  assert.equal(grid[0], "2026-10-26");
+  assert.equal(grid.at(-1), "2026-12-06");
+  assert.equal(grid.length % 7, 0);
+  assert.equal(monthEndISO("2028-02-10"), "2028-02-29");
+  assert.equal(addMonthsISO("2026-12-31", 1), "2027-01-01");
+  assert.equal(addMonthsISO("2026-01-15", -1), "2025-12-01");
+});

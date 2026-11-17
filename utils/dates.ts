@@ -220,3 +220,37 @@ export function formatMinutes(total: number | null | undefined): string {
   const m = total % 60;
   return `${h} h ${String(m).padStart(2, "0")} min`;
 }
+
+// ---- Meses ---------------------------------------------------------------------
+
+/** Primer día del mes (YYYY-MM-01). */
+export function monthStartISO(isoDate: string): string {
+  return `${isoDate.slice(0, 7)}-01`;
+}
+
+/** Suma meses a una fecha de calendario y devuelve el primer día de ese mes. */
+export function addMonthsISO(isoDate: string, months: number): string {
+  const [y, m] = isoDate.split("-").map(Number) as [number, number];
+  const dt = new Date(Date.UTC(y, m - 1 + months, 1));
+  return `${dt.getUTCFullYear()}-${pad(dt.getUTCMonth() + 1)}-01`;
+}
+
+/** Último día del mes. */
+export function monthEndISO(isoDate: string): string {
+  return addDaysISO(addMonthsISO(isoDate, 1), -1);
+}
+
+/** Días de la cuadrícula mensual (semanas completas de lunes a domingo). */
+export function monthGridISO(isoDate: string): string[] {
+  const first = weekStartISO(monthStartISO(isoDate));
+  const last = addDaysISO(weekStartISO(monthEndISO(isoDate)), 6);
+  const days: string[] = [];
+  for (let d = first; d <= last; d = addDaysISO(d, 1)) days.push(d);
+  return days;
+}
+
+export function formatMonth(isoDate: string): string {
+  const [y, m] = isoDate.split("-").map(Number) as [number, number];
+  const text = new Intl.DateTimeFormat(LOCALE, { timeZone: "UTC", month: "long", year: "numeric" }).format(new Date(Date.UTC(y, m - 1, 15)));
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
