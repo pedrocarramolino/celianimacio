@@ -34,7 +34,7 @@ export default function SettingsPage() {
       <PageHeader title="Configuración" description="Parámetros de la empresa, ubicaciones, roles y registro de actividad." />
       <SegmentedTabs
         label="Secciones"
-        className="mb-5 flex-wrap"
+        className="mb-5"
         value={tab}
         onChange={setTab}
         options={[
@@ -350,11 +350,49 @@ function UsersTab() {
   );
 }
 
+const AUDIT_LABELS: Record<string, string> = {
+  "bootstrap.admin": "Administrador configurado",
+  "account.activated": "Cuenta de trabajador activada",
+  "employee.created": "Trabajador creado",
+  "employee.updated": "Ficha de trabajador editada",
+  "employee.active": "Trabajador reactivado",
+  "employee.inactive": "Trabajador desactivado",
+  "invitation.created": "Invitación creada",
+  "invitation.revoked": "Invitación revocada",
+  "location.saved": "Ubicación guardada",
+  "location.removed": "Ubicación eliminada",
+  "event.created": "Evento creado",
+  "event.updated": "Evento editado",
+  "event.cancelled": "Evento cancelado",
+  "shift.created": "Turno creado",
+  "shift.updated": "Turno editado",
+  "shift.cancelled": "Turno cancelado",
+  "assignment.pending": "Preasignación",
+  "assignment.confirmed": "Asignación confirmada",
+  "assignment.cancelled": "Asignación cancelada",
+  "attendance.check_in": "Fichaje de entrada",
+  "attendance.break_start": "Inicio de pausa",
+  "attendance.break_end": "Fin de pausa",
+  "attendance.check_out": "Fichaje de salida",
+  "attendance.admin_close": "Jornada cerrada por administración",
+  "availability.saved": "Disponibilidad guardada",
+  "settings.saved": "Configuración guardada",
+  "user.role": "Cambio de rol",
+  "user.activated": "Usuario activado",
+  "user.deactivated": "Usuario desactivado",
+};
+
 function AuditTab() {
   const logs = useAsync(() => settingsService.recentAudit(50), []);
   if (logs.error) return <ErrorState message={logs.error} onRetry={logs.reload} />;
   if (!logs.data) return <LoadingBlock />;
-  if (logs.data.length === 0) return <EmptyState title="Sin actividad registrada" />;
+  if (logs.data.length === 0)
+    return (
+      <EmptyState
+        title="Sin actividad registrada"
+        description="Aquí aparecerán las acciones realizadas en la aplicación (crear eventos, trabajadores, asignaciones, fichajes…). Los cambios hechos directamente en la consola de Firebase no se registran."
+      />
+    );
   return (
     <Card>
       <CardHeader>
@@ -363,26 +401,17 @@ function AuditTab() {
           prueba de manipulaciones.
         </CardDescription>
       </CardHeader>
-      <Table>
-        <THead>
-          <tr>
-            <TH>Fecha</TH>
-            <TH>Acción</TH>
-            <TH>Detalle</TH>
-          </tr>
-        </THead>
-        <TBody>
+      <CardContent>
+        <ul className="divide-y">
           {logs.data.map((l) => (
-            <TR key={l.id}>
-              <TD className="whitespace-nowrap">{formatDateTime(l.at)}</TD>
-              <TD>
-                <code className="text-xs">{l.action}</code>
-              </TD>
-              <TD className="text-sm text-muted-foreground">{l.summary || l.entityId}</TD>
-            </TR>
+            <li key={l.id} className="flex flex-col gap-0.5 py-2.5 sm:flex-row sm:items-baseline sm:gap-4">
+              <span className="shrink-0 text-xs text-muted-foreground sm:w-28">{formatDateTime(l.at)}</span>
+              <span className="text-sm font-medium">{AUDIT_LABELS[l.action] ?? l.action}</span>
+              {l.summary && <span className="min-w-0 truncate text-sm text-muted-foreground">{l.summary}</span>}
+            </li>
           ))}
-        </TBody>
-      </Table>
+        </ul>
+      </CardContent>
     </Card>
   );
 }

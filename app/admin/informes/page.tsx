@@ -54,7 +54,7 @@ export default function ReportsPage() {
         title="Informes"
         description="Horas por trabajador, evento y periodo a partir de los fichajes registrados."
         actions={
-          <div className="no-print flex gap-2">
+          <div className="no-print flex flex-wrap gap-2">
             <Button variant="outline" onClick={() => report.data && downloadTextFile(`fichajes-detalle_${suffix}.csv`, reportService.detailCsv(report.data.sessions))} disabled={!report.data}>
               <Download /> CSV detalle
             </Button>
@@ -68,16 +68,16 @@ export default function ReportsPage() {
         }
       />
       <Card className="no-print mb-4">
-        <CardContent className="flex flex-col gap-3 pt-5 sm:flex-row sm:items-end">
-          <div className="space-y-1.5">
+        <CardContent className="grid grid-cols-2 gap-3 pt-5 sm:flex sm:items-end">
+          <div className="min-w-0 space-y-1.5">
             <Label htmlFor="from">Desde</Label>
             <Input id="from" type="date" value={from} max={to} onChange={(e) => setFrom(e.target.value)} />
           </div>
-          <div className="space-y-1.5">
+          <div className="min-w-0 space-y-1.5">
             <Label htmlFor="to">Hasta</Label>
             <Input id="to" type="date" value={to} min={from} onChange={(e) => setTo(e.target.value)} />
           </div>
-          <div className="flex gap-2">
+          <div className="col-span-2 flex flex-wrap gap-2">
             <Button variant="ghost" size="sm" onClick={() => { setFrom(addDaysISO(today, -6)); setTo(today); }}>Últimos 7 días</Button>
             <Button variant="ghost" size="sm" onClick={() => { setFrom(monthStart(today)); setTo(today); }}>Este mes</Button>
           </div>
@@ -98,7 +98,7 @@ export default function ReportsPage() {
             <StatCard label="Con incidencias" value={report.data.withIncidents.length} icon={AlertTriangle} tone={report.data.withIncidents.length ? "danger" : "success"} />
           </div>
           <SegmentedTabs
-            className="no-print flex-wrap"
+            className="no-print"
             label="Tipo de informe"
             value={tab}
             onChange={setTab}

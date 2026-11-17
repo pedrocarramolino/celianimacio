@@ -109,7 +109,7 @@ export function AppShell({ nav, root, children }: { nav: NavItem[]; root: string
         </div>
       )}
 
-      <main className="mx-auto w-full max-w-7xl px-4 pb-28 pt-6 sm:px-6 lg:px-8 lg:pb-10">{children}</main>
+      <main className="mx-auto w-full min-w-0 max-w-7xl px-4 pb-28 pt-6 sm:px-6 lg:px-8 lg:pb-10">{children}</main>
 
       {/* Barra inferior móvil */}
       {mobileItems.length > 0 && (

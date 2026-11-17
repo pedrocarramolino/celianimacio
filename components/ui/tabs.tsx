@@ -1,6 +1,8 @@
 "use client";
+import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
+/** Pestañas en una sola línea; en móvil se desplazan horizontalmente y la activa queda visible. */
 export function SegmentedTabs<T extends string>({
   value,
   onChange,
@@ -14,8 +16,27 @@ export function SegmentedTabs<T extends string>({
   className?: string;
   label: string;
 }) {
+  const listRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const list = listRef.current;
+    const active = list?.querySelector<HTMLElement>('[aria-selected="true"]');
+    if (!list || !active) return;
+    const left = active.offsetLeft - list.offsetLeft;
+    if (left < list.scrollLeft || left + active.offsetWidth > list.scrollLeft + list.clientWidth) {
+      list.scrollTo({ left: Math.max(0, left - 8), behavior: "smooth" });
+    }
+  }, [value]);
+
   return (
-    <div role="tablist" aria-label={label} className={cn("inline-flex rounded-lg bg-muted p-1", className)}>
+    <div
+      ref={listRef}
+      role="tablist"
+      aria-label={label}
+      className={cn(
+        "inline-flex max-w-full flex-nowrap overflow-x-auto rounded-lg bg-muted p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        className,
+      )}
+    >
       {options.map((o) => (
         <button
           key={o.value}
@@ -24,7 +45,7 @@ export function SegmentedTabs<T extends string>({
           aria-selected={value === o.value}
           onClick={() => onChange(o.value)}
           className={cn(
-            "rounded-md px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer",
+            "shrink-0 cursor-pointer whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
             value === o.value ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
           )}
         >
