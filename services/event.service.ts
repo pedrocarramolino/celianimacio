@@ -1,5 +1,5 @@
 import type { AssignmentRepository, AuditRepository, EventInput, EventRepository, LocationInput, LocationRepository, ShiftRepository } from "@/repositories/contracts";
-import type { CompanyEvent, Location, LocationSnapshot } from "@/types";
+import { EMPTY_PRIVATE, type CompanyEvent, type EventPrivate, type Location, type LocationSnapshot } from "@/types";
 import { eventSchema, type EventFormValues } from "@/schemas/event";
 import { locationSchema, type LocationFormValues } from "@/schemas/location";
 import { parseNumber } from "@/schemas/common";
@@ -7,7 +7,7 @@ import { AppError } from "@/utils/errors";
 import { isActiveAssignment } from "./domain/assignment-rules";
 import { notificationTemplates } from "./notification.service";
 import { requireAdmin } from "./session";
-import { todayISO } from "@/utils/dates";
+import { buildShiftInterval, todayISO } from "@/utils/dates";
 
 export function snapshotFromForm(v: {
   locationId?: string;
@@ -27,7 +27,7 @@ export function snapshotFromForm(v: {
   };
 }
 
-export function eventToForm(e: CompanyEvent): EventFormValues {
+export function eventToForm(e: CompanyEvent, priv: EventPrivate = EMPTY_PRIVATE): EventFormValues {
   return {
     name: e.name,
     description: e.description,
@@ -41,7 +41,27 @@ export function eventToForm(e: CompanyEvent): EventFormValues {
     lat: String(e.location.lat),
     lng: String(e.location.lng),
     radiusMeters: String(e.location.radiusMeters),
+    meetingTime: e.sheet.meetingTime,
+    meetingPlace: e.sheet.meetingPlace,
+    startTime: e.sheet.startTime,
+    endTime: e.sheet.endTime,
+    room: e.sheet.room,
+    kids: e.sheet.kids == null ? "" : String(e.sheet.kids),
+    ages: e.sheet.ages,
+    dressCode: e.sheet.dressCode,
+    material: e.sheet.material,
+    contactPhone: e.sheet.contactPhone,
+    totalPrice: e.sheet.totalPrice == null ? "" : String(e.sheet.totalPrice).replace(".", ","),
+    paidAmount: e.sheet.paidAmount == null ? "" : String(e.sheet.paidAmount).replace(".", ","),
+    extraHour: e.sheet.extraHour,
+    adminNotes: priv.adminNotes,
+    createShift: false,
+    monitors: "",
   };
+}
+
+function formToPrivate(v: EventFormValues): EventPrivate {
+  return { adminNotes: v.adminNotes };
 }
 
 function formToInput(values: EventFormValues): EventInput {
@@ -54,6 +74,21 @@ function formToInput(values: EventFormValues): EventInput {
     category: v.category,
     instructions: v.instructions,
     location: snapshotFromForm(v),
+    sheet: {
+      meetingTime: v.meetingTime,
+      meetingPlace: v.meetingPlace,
+      startTime: v.startTime,
+      endTime: v.endTime,
+      room: v.room,
+      kids: v.kids === "" ? null : Number(v.kids),
+      ages: v.ages,
+      dressCode: v.dressCode,
+      material: v.material,
+      contactPhone: v.contactPhone,
+      totalPrice: v.totalPrice === "" ? null : Number(v.totalPrice.replace(",", ".")),
+      paidAmount: v.paidAmount === "" ? null : Number(v.paidAmount.replace(",", ".")),
+      extraHour: v.extraHour,
+    },
   };
 }
 
@@ -87,10 +122,36 @@ export class EventService {
     return e;
   }
 
+  /**
+   * Crea el evento, sus datos económicos (privados) y, si se pide, un turno automático
+   * desde la hora de nave (o de inicio) hasta el final del evento.
+   */
   async create(values: EventFormValues): Promise<string> {
     const actor = requireAdmin();
     const input = formToInput(values);
+    const v = eventSchema.parse(values);
     const id = await this.events.create(input, actor);
+    await this.events.savePrivate(id, formToPrivate(v));
+    if (v.createShift && v.startTime && v.endTime) {
+      const event = await this.get(id);
+      const from = v.meetingTime || v.startTime;
+      const { startAt, endAt } = buildShiftInterval(v.date, from, v.endTime);
+      await this.shifts.create(
+        event,
+        {
+          name: v.meetingTime ? `Equipo (nave ${v.meetingTime})` : "Equipo",
+          date: v.date,
+          startAt,
+          endAt,
+          requiredWorkers: Number(v.monitors),
+          position: "",
+          location: null,
+          instructions: "",
+        },
+        "open",
+        actor,
+      );
+    }
     await this.audit.log({ action: "event.created", entityType: "event", entityId: id, summary: input.name }, actor);
     return id;
   }
@@ -106,7 +167,13 @@ export class EventService {
       rename = { shiftIds: shifts.map((s) => s.id), assignmentIds: assignments.map((a) => a.id) };
     }
     await this.events.update(id, input, rename);
+    await this.events.savePrivate(id, formToPrivate(eventSchema.parse(values)));
     await this.audit.log({ action: "event.updated", entityType: "event", entityId: id, summary: input.name }, actor);
+  }
+
+  getPrivate(id: string): Promise<EventPrivate> {
+    requireAdmin();
+    return this.events.getPrivate(id);
   }
 
   async cancel(id: string, reason: string): Promise<void> {

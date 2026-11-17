@@ -211,6 +211,16 @@ describe("flujos de administración en lote", () => {
   });
 });
 
+describe("notas internas del evento", () => {
+  test("solo administración lee y escribe las notas internas", async () => {
+    const priv = { adminNotes: "Cliente habitual", updatedAt: serverTimestamp() };
+    await assertSucceeds(setDoc(doc(adminCtx(), "eventPrivate", "ev1"), priv));
+    await assertSucceeds(getDoc(doc(adminCtx(), "eventPrivate", "ev1")));
+    await assertFails(getDoc(doc(workerCtx(), "eventPrivate", "ev1")));
+    await assertFails(setDoc(doc(workerCtx(), "eventPrivate", "ev1"), priv));
+  });
+});
+
 describe("datos privados de empleados", () => {
   test("el trabajador lee su ficha pero no la de otros", async () => {
     await assertSucceeds(getDoc(doc(workerCtx(), "employees", "empA")));
@@ -255,6 +265,9 @@ describe("eventos, turnos y compañeros", () => {
     await assertFails(addDoc(collection(db, "events"), { ...base, status: "inventado" }));
     await assertSucceeds(addDoc(collection(db, "events"), { ...base, category: "comunion" }));
     await assertFails(addDoc(collection(db, "events"), { ...base, category: "inventado" }));
+    const sheet = { meetingTime: "13:45", meetingPlace: "Nave", startTime: "15:30", endTime: "19:30", room: "", kids: 19, ages: "4-10", dressCode: "", material: "Zona infantil", contactPhone: "600000000", totalPrice: 1087, paidAmount: 300, extraHour: "50 €/h" };
+    await assertSucceeds(addDoc(collection(db, "events"), { ...base, category: "comunion", ...sheet }));
+    await assertFails(addDoc(collection(db, "events"), { ...base, ...sheet, meetingTime: "25:00" }));
   });
 });
 

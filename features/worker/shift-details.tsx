@@ -8,6 +8,7 @@ import { mapsUrl } from "@/utils/geo";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { LoadingBlock } from "@/components/layout/states";
+import { EventSheetView } from "@/features/events/event-sheet-view";
 
 /**
  * Detalle de un turno para el trabajador asignado: horario, dirección, instrucciones y
@@ -36,7 +37,7 @@ export function WorkerShiftDetails({ assignment }: { assignment: Assignment }) {
         <div className="flex items-start gap-2">
           <Clock className="mt-0.5 size-4 text-primary" />
           <div>
-            <p className="font-medium capitalize">{formatDateLong(shift.startAt)}</p>
+            <p className="font-medium">{formatDateLong(shift.startAt)}</p>
             <p className="text-muted-foreground">
               {formatTime(shift.startAt)} – {formatTime(shift.endAt)}
               {shift.position && ` · ${shift.position}`}
@@ -55,6 +56,9 @@ export function WorkerShiftDetails({ assignment }: { assignment: Assignment }) {
             </Button>
           </div>
         </div>
+      </div>
+      <div className="rounded-lg border p-3">
+        <EventSheetView event={event} />
       </div>
       {(event.instructions || shift.instructions) && (
         <div className="space-y-2 rounded-lg bg-muted/60 p-3">

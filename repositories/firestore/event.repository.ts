@@ -1,10 +1,10 @@
-import { addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc, where, writeBatch } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, setDoc, updateDoc, where, writeBatch } from "firebase/firestore";
 import { getDb } from "@/lib/firebase/client";
 import { COLLECTIONS } from "@/lib/firebase/collections";
 import type { Actor, EventInput, EventRepository, NotificationDraft } from "../contracts";
-import { mapEvent, serializeLocationSnapshot } from "./mappers";
+import { mapEvent, mapEventPrivate, serializeLocationSnapshot } from "./mappers";
 import { addNotifications } from "./notification.repository";
-import type { Assignment, CompanyEvent, Shift } from "@/types";
+import type { Assignment, CompanyEvent, EventPrivate, Shift } from "@/types";
 import { AppError } from "@/utils/errors";
 
 const serialize = (i: EventInput) => ({
@@ -15,6 +15,19 @@ const serialize = (i: EventInput) => ({
   instructions: i.instructions,
   status: i.status,
   category: i.category,
+  meetingTime: i.sheet.meetingTime,
+  meetingPlace: i.sheet.meetingPlace.trim(),
+  startTime: i.sheet.startTime,
+  endTime: i.sheet.endTime,
+  room: i.sheet.room.trim(),
+  kids: i.sheet.kids,
+  ages: i.sheet.ages.trim(),
+  dressCode: i.sheet.dressCode.trim(),
+  material: i.sheet.material,
+  contactPhone: i.sheet.contactPhone.trim(),
+  totalPrice: i.sheet.totalPrice,
+  paidAmount: i.sheet.paidAmount,
+  extraHour: i.sheet.extraHour.trim(),
 });
 
 export class FirestoreEventRepository implements EventRepository {
@@ -35,6 +48,18 @@ export class FirestoreEventRepository implements EventRepository {
       query(collection(getDb(), COLLECTIONS.events), where("date", ">=", from), where("date", "<=", toInclusive), orderBy("date")),
     );
     return snap.docs.map((d) => mapEvent(d.id, d.data()));
+  }
+
+  async getPrivate(id: string) {
+    const snap = await getDoc(doc(getDb(), COLLECTIONS.eventPrivate, id));
+    return mapEventPrivate(snap.exists() ? snap.data() : undefined);
+  }
+
+  async savePrivate(id: string, value: EventPrivate) {
+    await setDoc(doc(getDb(), COLLECTIONS.eventPrivate, id), {
+      adminNotes: value.adminNotes,
+      updatedAt: serverTimestamp(),
+    });
   }
 
   async getById(id: string) {

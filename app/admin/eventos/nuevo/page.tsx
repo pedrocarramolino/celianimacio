@@ -26,6 +26,7 @@ export default function NewEventPage() {
           defaultValues={emptyEvent(data.data.settings.defaultRadiusMeters, todayISO())}
           locations={data.data.locations}
           submitLabel="Crear evento"
+          isNew
           error={error}
           onSubmit={async (v) => {
             setError(null);

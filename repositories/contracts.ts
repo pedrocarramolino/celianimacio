@@ -19,6 +19,8 @@ import type {
   Employee,
   EntityId,
   EventCategory,
+  EventPrivate,
+  EventSheet,
   EventStatus,
   Invitation,
   ISODate,
@@ -84,6 +86,7 @@ export interface EventInput {
   instructions: string;
   status: EventStatus;
   category: EventCategory;
+  sheet: EventSheet;
 }
 
 export interface EventRepository {
@@ -91,6 +94,8 @@ export interface EventRepository {
   listFrom(fromDate: ISODate, max?: number): Promise<CompanyEvent[]>;
   listByDateRange(from: ISODate, toInclusive: ISODate): Promise<CompanyEvent[]>;
   getById(id: EntityId): Promise<CompanyEvent | null>;
+  getPrivate(id: EntityId): Promise<EventPrivate>;
+  savePrivate(id: EntityId, value: EventPrivate): Promise<void>;
   create(input: EventInput, actor: Actor): Promise<EntityId>;
   /** Actualiza el evento. Si cambia el nombre, lo propaga a turnos y asignaciones (mismo lote). */
   update(id: EntityId, input: EventInput, rename?: { shiftIds: EntityId[]; assignmentIds: EntityId[] }): Promise<void>;

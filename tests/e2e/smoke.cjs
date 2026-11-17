@@ -75,6 +75,12 @@ async function step(name, fn) {
     await admin.getByLabel("Tipo de evento").selectOption("boda");
     await admin.getByLabel("Fecha del evento").fill(s.date);
     await admin.getByLabel("Instrucciones para el personal").fill("Llegar 15 minutos antes.");
+    await admin.getByLabel("Niños (xiquets)").fill("19");
+    await admin.getByLabel("Observaciones / material").fill("Zona infantil - Juegos gigantes - Altavoz");
+    await admin.getByLabel("Precio total (€)").fill("1087");
+    await admin.getByLabel("Pagado / señal (€)").fill("300");
+    await admin.getByLabel("Hora extra").fill("50 €/h");
+    await admin.getByLabel("Crear turno automáticamente").uncheck();
     await admin.getByLabel("Nombre del lugar").fill("Masía de prueba");
     await admin.getByLabel("Dirección", { exact: true }).fill("Camí de prova 1");
     await admin.getByLabel("Latitud").fill(String(COORDS.latitude));
@@ -140,6 +146,9 @@ async function step(name, fn) {
     await worker.waitForURL(`${BASE}/trabajador/`);
     await worker.getByText("Tu próximo turno").waitFor();
     await worker.getByText("Masía de prueba").first().waitFor();
+    await worker.getByText("19 niños").first().waitFor();
+    await worker.getByText("Pendiente de pago").first().waitFor();
+    await worker.getByText(/787/).first().waitFor();
     if (SHOTS) await worker.screenshot({ path: `${SHOTS}/trabajador-inicio.png` });
   });
 
@@ -185,6 +194,24 @@ async function step(name, fn) {
     await admin.goto(`${BASE}/admin/`);
     await admin.getByText("Fichajes de hoy").waitFor();
     if (SHOTS) await admin.screenshot({ path: `${SHOTS}/admin-dashboard.png` });
+  });
+
+  await step("evento con turno automático desde la hora de nave", async () => {
+    await admin.goto(`${BASE}/admin/eventos/nuevo/`);
+    await admin.getByLabel("Nombre", { exact: false }).first().fill("Comunión Zendaya");
+    await admin.getByLabel("Tipo de evento").selectOption("comunion");
+    await admin.getByLabel("Fecha del evento").fill(s.date);
+    await admin.getByLabel("Hora nave").fill("13:45");
+    await admin.getByLabel("Hora evento: inicio").fill("15:30");
+    await admin.getByLabel("Hora evento: fin").fill("19:30");
+    await admin.getByLabel("Monitores necesarios").fill("3");
+    await admin.getByLabel("Nombre del lugar").fill("Blau Mar");
+    await admin.getByLabel("Latitud").fill("39.19");
+    await admin.getByLabel("Longitud").fill("-0.50");
+    await admin.getByRole("button", { name: "Crear evento" }).click();
+    await admin.waitForURL(/\/admin\/eventos\/detalle\/\?id=/);
+    await admin.getByText("Equipo (nave 13:45)").waitFor();
+    await admin.getByText("0 confirmados de 3").waitFor();
   });
 
   await step("cancelar evento notifica al trabajador", async () => {

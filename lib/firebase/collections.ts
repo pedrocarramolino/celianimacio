@@ -5,6 +5,7 @@ export const COLLECTIONS = {
   invitations: "invitations",
   locations: "locations",
   events: "events",
+  eventPrivate: "eventPrivate",
   shifts: "shifts",
   shiftTeams: "shiftTeams",
   availability: "availability",

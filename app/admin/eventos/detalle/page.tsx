@@ -18,7 +18,8 @@ import { useAsync } from "@/hooks/use-async";
 import { eventService, shiftService } from "@/services";
 import { eventToForm } from "@/services/event.service";
 import { shiftToForm } from "@/services/shift.service";
-import type { CompanyEvent, Shift } from "@/types";
+import type { CompanyEvent, EventPrivate, Shift } from "@/types";
+import { EventSheetView } from "@/features/events/event-sheet-view";
 import { formatISODate, formatTime } from "@/utils/dates";
 import { errorMessage } from "@/utils/errors";
 import { mapsUrl } from "@/utils/geo";
@@ -35,12 +36,13 @@ function EventDetail() {
   const id = useSearchParams().get("id") ?? "";
   const data = useAsync(
     async () => {
-      const [event, shifts, locations] = await Promise.all([
+      const [event, shifts, locations, priv] = await Promise.all([
         eventService.get(id),
         shiftService.listByEvent(id),
         eventService.listLocations(),
+        eventService.getPrivate(id).catch(() => null),
       ]);
-      return { event, shifts, locations };
+      return { event, shifts, locations, priv };
     },
     [id],
     Boolean(id),
@@ -51,7 +53,7 @@ function EventDetail() {
   if (!id) return <ErrorState message="Falta el identificador del evento." />;
   if (data.error) return <ErrorState message={data.error} onRetry={data.reload} />;
   if (!data.data) return <LoadingBlock rows={5} />;
-  const { event, shifts, locations } = data.data;
+  const { event, shifts, locations, priv } = data.data;
   const cancelled = event.status === "cancelled";
 
   return (
@@ -97,6 +99,14 @@ function EventDetail() {
           </Button>
         </CardContent>
       </Card>
+      <Card className="mb-5">
+        <CardHeader>
+          <CardTitle>Ficha</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <EventSheetView event={event} priv={priv} />
+        </CardContent>
+      </Card>
       <SegmentedTabs
         label="Secciones del evento"
         className="mb-4"
@@ -112,7 +122,7 @@ function EventDetail() {
         (cancelled ? (
           <Alert variant="info">Un evento cancelado no se puede editar.</Alert>
         ) : (
-          <EditEvent event={event} locations={locations} onSaved={data.reload} />
+          <EditEvent event={event} priv={priv} locations={locations} onSaved={data.reload} />
         ))}
       <ConfirmDialog
         open={cancelOpen}
@@ -131,7 +141,17 @@ function EventDetail() {
   );
 }
 
-function EditEvent({ event, locations, onSaved }: { event: CompanyEvent; locations: Parameters<typeof EventForm>[0]["locations"]; onSaved: () => Promise<void> }) {
+function EditEvent({
+  event,
+  priv,
+  locations,
+  onSaved,
+}: {
+  event: CompanyEvent;
+  priv: EventPrivate | null;
+  locations: Parameters<typeof EventForm>[0]["locations"];
+  onSaved: () => Promise<void>;
+}) {
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   return (
@@ -142,7 +162,7 @@ function EditEvent({ event, locations, onSaved }: { event: CompanyEvent; locatio
       </Alert>
       <EventForm
         key={event.updatedAt?.getTime() ?? 0}
-        defaultValues={eventToForm(event)}
+        defaultValues={eventToForm(event, priv ?? undefined)}
         locations={locations}
         submitLabel="Guardar cambios"
         error={error}

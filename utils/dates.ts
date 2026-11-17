@@ -172,13 +172,14 @@ export function formatDate(date: Date | null | undefined, tz: string = DEFAULT_T
 }
 
 export function formatDateLong(date: Date, tz: string = DEFAULT_TZ): string {
-  return new Intl.DateTimeFormat(LOCALE, {
+  const t = new Intl.DateTimeFormat(LOCALE, {
     timeZone: tz,
     weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric",
   }).format(date);
+  return t.charAt(0).toUpperCase() + t.slice(1);
 }
 
 export function formatISODate(isoDate: string | null | undefined, opts?: Intl.DateTimeFormatOptions): string {

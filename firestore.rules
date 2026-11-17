@@ -232,9 +232,29 @@ service cloud.firestore {
         return ['name', 'description', 'date', 'location', 'instructions', 'status', 'staffEmployeeIds',
                 'shiftCount', 'createdAt', 'updatedAt', 'createdBy'];
       }
-      // "category" es opcional para no invalidar eventos creados antes de existir el campo.
+      // Campos opcionales (añadidos después): no invalidan eventos antiguos.
+      function optionalEventKeys() {
+        return ['category', 'meetingTime', 'meetingPlace', 'startTime', 'endTime', 'room', 'kids', 'ages',
+                'dressCode', 'material', 'contactPhone', 'totalPrice', 'paidAmount', 'extraHour'];
+      }
+      function validSheet(d) {
+        return (d.get('meetingTime', '') == '' || isClock(d.meetingTime))
+          && (d.get('startTime', '') == '' || isClock(d.startTime))
+          && (d.get('endTime', '') == '' || isClock(d.endTime))
+          && d.get('meetingPlace', '') is string && d.get('meetingPlace', '').size() <= 120
+          && d.get('room', '') is string && d.get('room', '').size() <= 120
+          && d.get('ages', '') is string && d.get('ages', '').size() <= 80
+          && d.get('dressCode', '') is string && d.get('dressCode', '').size() <= 200
+          && d.get('material', '') is string && d.get('material', '').size() <= 2000
+          && d.get('contactPhone', '') is string && d.get('contactPhone', '').size() <= 30
+          && d.get('extraHour', '') is string && d.get('extraHour', '').size() <= 120
+          && (d.get('kids', null) == null || (d.kids is int && d.kids >= 0 && d.kids <= 2000))
+          && (d.get('totalPrice', null) == null || (d.totalPrice is number && d.totalPrice >= 0))
+          && (d.get('paidAmount', null) == null || (d.paidAmount is number && d.paidAmount >= 0));
+      }
       function validEvent() {
-        return data().keys().hasOnly(eventKeys().concat(['category'])) && data().keys().hasAll(eventKeys())
+        return data().keys().hasOnly(eventKeys().concat(optionalEventKeys())) && data().keys().hasAll(eventKeys())
+          && validSheet(data())
           && (!('category' in data()) || data().category in ['boda', 'comunion', 'bautizo', 'cumpleanos',
               'fiesta_infantil', 'papa_noel', 'halloween', 'fallas', 'fiesta_espuma', 'campus', 'torneo',
               'empresa', 'otro'])
@@ -253,6 +273,16 @@ service cloud.firestore {
       allow create: if isAdmin() && validEvent() && createdNow() && data().createdBy == uid();
       allow update: if isAdmin() && validEvent() && updatedNow() && keepsCreation();
       allow delete: if false; // los eventos se cancelan, no se borran
+    }
+
+    // ================================================================ eventPrivate
+    // Notas internas del evento: solo administración.
+    match /eventPrivate/{eventId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin()
+        && data().keys().hasOnly(['adminNotes', 'updatedAt'])
+        && isStr(data().adminNotes, 0, 2000)
+        && updatedNow();
     }
 
     // ==================================================================== shifts

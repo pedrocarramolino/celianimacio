@@ -22,6 +22,8 @@ import {
   type AuditLog,
   type BreakRecord,
   type CompanyEvent,
+  type EventSheet,
+  type EventPrivate,
   type CompanySettings,
   type DayAvailability,
   type Employee,
@@ -128,10 +130,33 @@ export function mapEvent(id: string, d: DocumentData): CompanyEvent {
     instructions: str(d, "instructions"),
     status: oneOf(d.status, EVENT_STATUSES, "draft"),
     category: oneOf(d.category, EVENT_CATEGORIES, "otro"),
+    sheet: mapSheet(d),
     staffEmployeeIds: strArray(d, "staffEmployeeIds"),
     shiftCount: num(d, "shiftCount"),
     ...audit(d),
   };
+}
+
+export function mapSheet(d: DocumentData): EventSheet {
+  return {
+    meetingTime: str(d, "meetingTime"),
+    meetingPlace: str(d, "meetingPlace"),
+    startTime: str(d, "startTime"),
+    endTime: str(d, "endTime"),
+    room: str(d, "room"),
+    kids: typeof d.kids === "number" ? d.kids : null,
+    ages: str(d, "ages"),
+    dressCode: str(d, "dressCode"),
+    material: str(d, "material"),
+    contactPhone: str(d, "contactPhone"),
+    totalPrice: typeof d.totalPrice === "number" ? d.totalPrice : null,
+    paidAmount: typeof d.paidAmount === "number" ? d.paidAmount : null,
+    extraHour: str(d, "extraHour"),
+  };
+}
+
+export function mapEventPrivate(d: DocumentData | undefined): EventPrivate {
+  return { adminNotes: d ? str(d, "adminNotes") : "" };
 }
 
 export function mapShift(id: string, d: DocumentData): Shift {
