@@ -2,8 +2,9 @@
 import { useEffect, useRef } from "react";
 import "leaflet/dist/leaflet.css";
 import type { Circle, Map as LeafletMap, Marker } from "leaflet";
+import { BRAND } from "@/lib/brand";
 
-const DEFAULT_CENTER: [number, number] = [41.3874, 2.1686]; // Barcelona
+const DEFAULT_CENTER: [number, number] = BRAND.mapCenter;
 
 /**
  * Mapa (OpenStreetMap + Leaflet, gratuito) para fijar el punto exacto del evento.
@@ -34,7 +35,7 @@ export function LocationMap({
     void import("leaflet").then((L) => {
       if (cancelled || !el.current || map.current) return;
       const center: [number, number] = has ? [lat!, lng!] : DEFAULT_CENTER;
-      const m = L.map(el.current, { scrollWheelZoom: false }).setView(center, has ? 17 : 8);
+      const m = L.map(el.current, { scrollWheelZoom: false }).setView(center, has ? 17 : 12);
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',

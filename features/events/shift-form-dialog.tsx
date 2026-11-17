@@ -9,6 +9,7 @@ import { Input, Textarea } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { LocationFields } from "./location-fields";
+import { POSITION_SUGGESTIONS, SHIFT_NAME_SUGGESTIONS } from "@/lib/brand";
 import type { CompanyEvent } from "@/types";
 import { errorMessage } from "@/utils/errors";
 
@@ -79,8 +80,8 @@ export function ShiftFormDialog({
           {error && <Alert variant="error">{error}</Alert>}
           {warning && <Alert variant="warning">{warning}</Alert>}
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField id="shift-name" label="Nombre del turno" error={errors.name?.message} hint="Ej.: Montaje, Animación infantil" required className="sm:col-span-2">
-              <Input {...form.register("name")} />
+            <FormField id="shift-name" label="Nombre del turno" error={errors.name?.message} hint="Elige una sugerencia o escribe otro nombre." required className="sm:col-span-2">
+              <Input list="shift-name-suggestions" autoComplete="off" {...form.register("name")} />
             </FormField>
             <FormField id="shift-date" label="Fecha" error={errors.date?.message} required>
               <Input type="date" {...form.register("date")} />
@@ -95,8 +96,18 @@ export function ShiftFormDialog({
               <Input type="time" {...form.register("endTime")} />
             </FormField>
             <FormField id="shift-position" label="Puesto requerido" error={errors.position?.message} className="sm:col-span-2">
-              <Input {...form.register("position")} />
+              <Input list="shift-position-suggestions" autoComplete="off" {...form.register("position")} />
             </FormField>
+            <datalist id="shift-name-suggestions">
+              {SHIFT_NAME_SUGGESTIONS.map((p) => (
+                <option key={p} value={p} />
+              ))}
+            </datalist>
+            <datalist id="shift-position-suggestions">
+              {POSITION_SUGGESTIONS.map((p) => (
+                <option key={p} value={p} />
+              ))}
+            </datalist>
           </div>
           <FormField id="shift-instructions" label="Instrucciones del turno" error={errors.instructions?.message}>
             <Textarea rows={3} {...form.register("instructions")} />

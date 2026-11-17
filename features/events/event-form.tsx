@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LocationFields } from "./location-fields";
+import { EVENT_NAME_HINT } from "@/lib/brand";
 import type { Location } from "@/types";
 
 export function emptyEvent(defaultRadius: number, date: string): EventFormValues {
@@ -50,7 +51,7 @@ export function EventForm({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField id="name" label="Nombre" error={errors.name?.message} required className="sm:col-span-2">
+            <FormField id="name" label="Nombre" error={errors.name?.message} hint={EVENT_NAME_HINT} required className="sm:col-span-2">
               <Input {...form.register("name")} />
             </FormField>
             <FormField id="date" label="Fecha del evento" error={errors.date?.message} required>

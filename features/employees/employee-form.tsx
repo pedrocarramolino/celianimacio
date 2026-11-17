@@ -6,6 +6,7 @@ import { FormField } from "@/components/ui/form-field";
 import { Input, Select, Textarea } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
+import { POSITION_SUGGESTIONS } from "@/lib/brand";
 
 export const EMPTY_EMPLOYEE: EmployeeFormValues = {
   firstName: "",
@@ -58,8 +59,8 @@ export function EmployeeForm({
         <FormField id="phone" label="Teléfono" error={errors.phone?.message}>
           <Input type="tel" {...form.register("phone")} />
         </FormField>
-        <FormField id="position" label="Puesto de trabajo" error={errors.position?.message} hint="Ej.: Animador/a, Monitor/a, Técnico de sonido">
-          <Input {...form.register("position")} />
+        <FormField id="position" label="Puesto de trabajo" error={errors.position?.message} hint="Elige una sugerencia o escribe otro puesto.">
+          <Input list="position-suggestions" autoComplete="off" {...form.register("position")} />
         </FormField>
         <FormField id="hireDate" label="Fecha de incorporación" error={errors.hireDate?.message}>
           <Input type="date" {...form.register("hireDate")} />
@@ -82,6 +83,11 @@ export function EmployeeForm({
       <FormField id="notes" label="Notas internas" error={errors.notes?.message} hint="Solo visibles para administración.">
         <Textarea rows={3} {...form.register("notes")} />
       </FormField>
+      <datalist id="position-suggestions">
+        {POSITION_SUGGESTIONS.map((p) => (
+          <option key={p} value={p} />
+        ))}
+      </datalist>
       {extra}
       <div className="flex justify-end">
         <Button type="submit" loading={isSubmitting}>

@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Cel i Animació",
     short_name: "Cel i Animació",
-    description: "Eventos, turnos y fichajes del equipo",
+    description: "Cel i Animació · Animación infantil y eventos: turnos y fichajes del equipo",
     lang: "es",
     start_url: "/",
     scope: "/",
