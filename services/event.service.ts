@@ -76,6 +76,11 @@ export class EventService {
     return this.events.listFrom(todayISO(), max);
   }
 
+  listRange(from: string, toInclusive: string): Promise<CompanyEvent[]> {
+    requireAdmin();
+    return this.events.listByDateRange(from, toInclusive);
+  }
+
   async get(id: string): Promise<CompanyEvent> {
     const e = await this.events.getById(id);
     if (!e) throw new AppError("Evento no encontrado.", "not-found");

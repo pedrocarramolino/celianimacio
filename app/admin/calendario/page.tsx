@@ -10,8 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SegmentedTabs } from "@/components/ui/tabs";
 import { useAsync } from "@/hooks/use-async";
-import { shiftService } from "@/services";
-import type { Shift } from "@/types";
+import { eventService, shiftService } from "@/services";
+import { CategoryBadge } from "@/components/layout/category-badge";
+import { EVENT_CATEGORY_EMOJI, type CompanyEvent, type Shift } from "@/types";
 import {
   addMonthsISO,
   formatISODate,
@@ -39,7 +40,7 @@ export default function CalendarPage() {
     <>
       <PageHeader
         title="Calendario"
-        description="Turnos y su cobertura."
+        description="Eventos, turnos y su cobertura."
         actions={
           <SegmentedTabs
             label="Vista"
@@ -74,19 +75,45 @@ function ShiftChip({ s, compact }: { s: Shift; compact?: boolean }) {
   );
 }
 
+function EventChip({ e }: { e: CompanyEvent }) {
+  return (
+    <Link
+      href={`/admin/eventos/detalle/?id=${e.id}`}
+      title={`${e.name}${e.shiftCount === 0 ? " · sin turnos" : ""}`}
+      className={cn(
+        "flex items-center gap-1 truncate rounded-md bg-primary px-1.5 py-0.5 text-[11px] font-medium leading-tight text-primary-foreground hover:bg-primary-hover",
+        e.status === "cancelled" && "line-through opacity-60",
+      )}
+    >
+      <span aria-hidden>{EVENT_CATEGORY_EMOJI[e.category]}</span>
+      <span className="truncate">{e.name}</span>
+    </Link>
+  );
+}
+
+/** Carga eventos y turnos de un rango de fechas. */
+async function loadRange(from: string, to: string) {
+  const [shifts, events] = await Promise.all([shiftService.listRange(from, to), eventService.listRange(from, to)]);
+  return { shifts, events };
+}
+
+function groupByDate<T extends { date: string }>(items: T[]): Map<string, T[]> {
+  const map = new Map<string, T[]>();
+  for (const it of items) map.set(it.date, [...(map.get(it.date) ?? []), it]);
+  return map;
+}
+
 function MonthView() {
   const today = todayISO();
   const [month, setMonth] = useState(() => monthStartISO(today));
   const [selected, setSelected] = useState<string>(today);
   const grid = useMemo(() => monthGridISO(month), [month]);
-  const { data, error, loading, reload } = useAsync(() => shiftService.listRange(grid[0]!, grid.at(-1)!), [month]);
+  const { data, error, loading, reload } = useAsync(() => loadRange(grid[0]!, grid.at(-1)!), [month]);
 
-  const byDay = useMemo(() => {
-    const map = new Map<string, Shift[]>();
-    for (const s of data ?? []) map.set(s.date, [...(map.get(s.date) ?? []), s]);
-    return map;
-  }, [data]);
+  const byDay = useMemo(() => groupByDate(data?.shifts ?? []), [data]);
+  const eventsByDay = useMemo(() => groupByDate(data?.events ?? []), [data]);
   const dayShifts = byDay.get(selected) ?? [];
+  const dayEvents = eventsByDay.get(selected) ?? [];
   const monthKey = month.slice(0, 7);
 
   const go = (delta: number) => {
@@ -134,6 +161,7 @@ function MonthView() {
             <div className="grid grid-cols-7">
               {grid.map((d) => {
                 const items = byDay.get(d) ?? [];
+                const evs = eventsByDay.get(d) ?? [];
                 const inMonth = d.startsWith(monthKey);
                 const isToday = d === today;
                 const isSel = d === selected;
@@ -143,7 +171,7 @@ function MonthView() {
                     role="button"
                     tabIndex={0}
                     aria-pressed={isSel}
-                    aria-label={`${formatISODate(d, { weekday: "long" })}: ${items.length} turno(s)`}
+                    aria-label={`${formatISODate(d, { weekday: "long" })}: ${evs.length} evento(s), ${items.length} turno(s)`}
                     onClick={() => setSelected(d)}
                     onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setSelected(d)}
                     className={cn(
@@ -163,16 +191,26 @@ function MonthView() {
                     </span>
                     {/* Móvil: puntos */}
                     <div className="flex flex-wrap gap-0.5 sm:hidden">
+                      {evs.slice(0, 3).map((e) => (
+                        <span key={e.id} className="text-[10px] leading-none" aria-hidden>
+                          {EVENT_CATEGORY_EMOJI[e.category]}
+                        </span>
+                      ))}
                       {items.slice(0, 6).map((s) => (
                         <span key={s.id} className={cn("size-1.5 rounded-full", dotTone[s.status])} />
                       ))}
                     </div>
                     {/* Escritorio: turnos */}
                     <div className="hidden space-y-0.5 sm:block">
-                      {items.slice(0, 3).map((s) => (
-                        <ShiftChip key={s.id} s={s} />
+                      {evs.slice(0, 2).map((e) => (
+                        <EventChip key={e.id} e={e} />
                       ))}
-                      {items.length > 3 && <p className="px-1 text-[11px] text-muted-foreground">+{items.length - 3} más</p>}
+                      {items.slice(0, Math.max(0, 3 - Math.min(evs.length, 2))).map((s) => (
+                        <ShiftChip key={s.id} s={s} compact={evs.length > 0} />
+                      ))}
+                      {evs.length + items.length > 3 && (
+                        <p className="px-1 text-[11px] text-muted-foreground">+{evs.length + items.length - 3} más</p>
+                      )}
                     </div>
                   </div>
                 );
@@ -190,8 +228,27 @@ function MonthView() {
               </Button>
             </CardHeader>
             <CardContent>
+              {dayEvents.length > 0 && (
+                <ul className="mb-3 space-y-2">
+                  {dayEvents.map((e) => (
+                    <li key={e.id}>
+                      <Link
+                        href={`/admin/eventos/detalle/?id=${e.id}`}
+                        className={cn("block rounded-lg border border-primary/30 bg-primary-soft/40 p-3 text-sm hover:border-primary", e.status === "cancelled" && "opacity-60")}
+                      >
+                        <p className="font-semibold">{e.name}</p>
+                        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                          <CategoryBadge category={e.category} />
+                          <span className="text-xs text-muted-foreground">{e.location.name}</span>
+                        </div>
+                        {e.shiftCount === 0 && <p className="mt-1 text-xs font-medium text-warning">Sin turnos: pulsa para añadirlos</p>}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
               {dayShifts.length === 0 ? (
-                <EmptyState title="Sin turnos este día" />
+                dayEvents.length === 0 && <EmptyState title="Nada programado este día" />
               ) : (
                 <ul className="space-y-2">
                   {dayShifts.map((s) => (
@@ -225,8 +282,8 @@ function MonthView() {
 
 function WeekView() {
   const [weekStart, setWeekStart] = useState(() => weekStartISO(todayISO()));
-  const { data, error, loading, reload } = useAsync(() => shiftService.listWeek(weekStart), [weekStart]);
   const days = weekDaysISO(weekStart);
+  const { data, error, loading, reload } = useAsync(() => loadRange(days[0]!, days[6]!), [weekStart]);
   const today = todayISO();
 
   return (
@@ -237,14 +294,18 @@ function WeekView() {
       {data && (
         <div className="grid gap-3 md:grid-cols-7">
           {days.map((d) => {
-            const items = data.filter((s) => s.date === d);
+            const items = data.shifts.filter((s) => s.date === d);
+            const evs = data.events.filter((e) => e.date === d);
             return (
               <section key={d} aria-label={formatISODate(d, { weekday: "long" })} className={cn("min-h-32 rounded-xl border bg-card p-2", d === today && "border-primary ring-1 ring-primary/30")}>
                 <h3 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {formatISODate(d, { weekday: "short", year: undefined })}
                 </h3>
                 <div className="space-y-2">
-                  {items.length === 0 && <p className="px-1 text-xs text-muted-foreground/70">Sin turnos</p>}
+                  {evs.map((e) => (
+                    <EventChip key={e.id} e={e} />
+                  ))}
+                  {items.length === 0 && evs.length === 0 && <p className="px-1 text-xs text-muted-foreground/70">Nada programado</p>}
                   {items.map((s) => (
                     <Link
                       key={s.id}

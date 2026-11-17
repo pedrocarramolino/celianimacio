@@ -89,6 +89,7 @@ export interface EventInput {
 export interface EventRepository {
   list(): Promise<CompanyEvent[]>;
   listFrom(fromDate: ISODate, max?: number): Promise<CompanyEvent[]>;
+  listByDateRange(from: ISODate, toInclusive: ISODate): Promise<CompanyEvent[]>;
   getById(id: EntityId): Promise<CompanyEvent | null>;
   create(input: EventInput, actor: Actor): Promise<EntityId>;
   /** Actualiza el evento. Si cambia el nombre, lo propaga a turnos y asignaciones (mismo lote). */

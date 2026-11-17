@@ -48,7 +48,7 @@ export function AppShell({ nav, root, children }: { nav: NavItem[]; root: string
             aria-current={active ? "page" : undefined}
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-              active ? "bg-primary text-primary-foreground" : "text-secondary-foreground hover:bg-muted",
+              active ? "bg-primary text-primary-foreground" : "text-foreground/80 hover:bg-muted",
             )}
           >
             <item.icon className="size-4" />

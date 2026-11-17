@@ -30,6 +30,13 @@ export class FirestoreEventRepository implements EventRepository {
     return snap.docs.map((d) => mapEvent(d.id, d.data()));
   }
 
+  async listByDateRange(from: string, toInclusive: string) {
+    const snap = await getDocs(
+      query(collection(getDb(), COLLECTIONS.events), where("date", ">=", from), where("date", "<=", toInclusive), orderBy("date")),
+    );
+    return snap.docs.map((d) => mapEvent(d.id, d.data()));
+  }
+
   async getById(id: string) {
     const snap = await getDoc(doc(getDb(), COLLECTIONS.events, id));
     return snap.exists() ? mapEvent(snap.id, snap.data()) : null;
