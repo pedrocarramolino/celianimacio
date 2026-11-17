@@ -52,5 +52,43 @@ export function useGeolocation() {
     }
   }, []);
 
-  return { locate, locating };
+  /**
+   * Varias lecturas durante unos segundos y devuelve la más precisa (útil para fijar el punto
+   * de un evento). Termina antes si alcanza la precisión objetivo.
+   */
+  const locateBest = useCallback(async (maxMs = 12000, targetAccuracy = 20): Promise<GeoResult> => {
+    if (typeof navigator === "undefined" || !("geolocation" in navigator)) {
+      return { reading: null, error: "Este dispositivo no permite geolocalización." };
+    }
+    setLocating(true);
+    try {
+      return await new Promise<GeoResult>((resolve) => {
+        let best: PositionReading | null = null;
+        let lastError: string | null = null;
+        const finish = () => {
+          navigator.geolocation.clearWatch(id);
+          clearTimeout(timer);
+          resolve(best ? { reading: best, error: null } : { reading: null, error: lastError ?? "No se pudo obtener la ubicación." });
+        };
+        const id = navigator.geolocation.watchPosition(
+          (pos) => {
+            if (!best || pos.coords.accuracy < best.accuracyMeters) {
+              best = { coords: { lat: pos.coords.latitude, lng: pos.coords.longitude }, accuracyMeters: pos.coords.accuracy };
+            }
+            if (pos.coords.accuracy <= targetAccuracy) finish();
+          },
+          (err) => {
+            lastError = describe(err);
+            if (err.code === err.PERMISSION_DENIED) finish();
+          },
+          { enableHighAccuracy: true, timeout: maxMs, maximumAge: 0 },
+        );
+        const timer = setTimeout(finish, maxMs);
+      });
+    } finally {
+      setLocating(false);
+    }
+  }, []);
+
+  return { locate, locateBest, locating };
 }

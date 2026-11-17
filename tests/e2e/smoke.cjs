@@ -75,10 +75,14 @@ async function step(name, fn) {
     await admin.getByLabel("Fecha del evento").fill(s.date);
     await admin.getByLabel("Instrucciones para el personal").fill("Llegar 15 minutos antes.");
     await admin.getByLabel("Nombre del lugar").fill("Masía de prueba");
-    await admin.getByLabel("Dirección").fill("Camí de prova 1");
+    await admin.getByLabel("Dirección", { exact: true }).fill("Camí de prova 1");
     await admin.getByLabel("Latitud").fill(String(COORDS.latitude));
     await admin.getByLabel("Longitud").fill(String(COORDS.longitude));
     await admin.getByLabel("Radio permitido para fichar (m)").fill("200");
+    // Pegar un enlace de Google Maps también rellena las coordenadas
+    await admin.getByLabel("Pegar coordenadas o enlace de Google Maps").fill(`https://maps.google.com/?q=${COORDS.latitude},${COORDS.longitude}`);
+    await admin.getByText("Coordenadas aplicadas.").waitFor();
+    if (SHOTS) await admin.screenshot({ path: `${SHOTS}/admin-evento-ubicacion.png`, fullPage: true });
     await admin.getByRole("button", { name: "Crear evento" }).click();
     await admin.waitForURL(/\/admin\/eventos\/detalle\/\?id=/);
     eventUrl = admin.url();

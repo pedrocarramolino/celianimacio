@@ -154,3 +154,13 @@ test("agregación de horas", () => {
   assert.equal(rows[0]?.incomplete, 1);
   assert.equal(totals(rows).workedMinutes, 180);
 });
+
+import { parseCoordinates } from "../../utils/geo";
+test("interpreta coordenadas y enlaces de Google Maps", () => {
+  assert.deepEqual(parseCoordinates("41.3874, 2.1686"), { lat: 41.3874, lng: 2.1686 });
+  assert.deepEqual(parseCoordinates("41,3874 2,1686"), { lat: 41.3874, lng: 2.1686 });
+  assert.deepEqual(parseCoordinates("https://www.google.com/maps/place/X/@41.38,2.17,17z/data=!3m1!4b1!4m6!3m5!1s0x0:0x0!8m2!3d41.3874!4d2.1686"), { lat: 41.3874, lng: 2.1686 });
+  assert.deepEqual(parseCoordinates("https://maps.google.com/?q=41.40,-0.5"), { lat: 41.4, lng: -0.5 });
+  assert.equal(parseCoordinates("Calle Mayor 1"), null);
+  assert.equal(parseCoordinates("200, 10"), null);
+});
