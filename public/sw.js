@@ -4,8 +4,8 @@
  * - NUNCA cachea peticiones a Firebase/Google: los datos los gestiona la caché de Firestore.
  * - Los fichajes requieren conexión para obtener la hora del servidor.
  */
-const CACHE = "cel-shell-v1";
-const PRECACHE = ["/", "/login/", "/manifest.webmanifest", "/icons/icon.svg"];
+const CACHE = "cel-shell-v2";
+const PRECACHE = ["/", "/login/", "/manifest.webmanifest", "/brand/logo.webp", "/brand/logo-circulo-256.webp"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(PRECACHE)).then(() => self.skipWaiting()));
@@ -27,7 +27,7 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return; // Firebase, Google, mapas: siempre red
 
   // Recursos con hash: cache-first
-  if (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/")) {
+  if (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/") || url.pathname.startsWith("/brand/")) {
     event.respondWith(
       caches.match(req).then(
         (hit) =>

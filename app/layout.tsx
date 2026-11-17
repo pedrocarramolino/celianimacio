@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "Gestión de eventos, turnos, disponibilidad y fichajes del equipo de Cel i Animació.",
   applicationName: "Cel i Animació",
   manifest: "/manifest.webmanifest",
-  icons: { icon: "/icons/icon.svg", apple: "/icons/icon-192.png" },
+  icons: { icon: "/icons/favicon-64.png", apple: "/icons/apple-touch-icon.png" },
   appleWebApp: { capable: true, title: "Cel i Animació", statusBarStyle: "default" },
   robots: { index: false, follow: false },
 };

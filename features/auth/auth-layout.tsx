@@ -1,4 +1,4 @@
-import { Logo, LogoMark, Wordmark } from "@/components/layout/logo";
+import { LogoFull } from "@/components/layout/logo";
 import { BRAND } from "@/lib/brand";
 
 /** Globos decorativos (ilustración propia en SVG). */
@@ -28,12 +28,8 @@ export function AuthLayout({ title, description, children }: { title: string; de
         <div className="absolute -right-24 -top-24 size-96 rounded-full bg-white/5" aria-hidden />
         <div className="absolute -bottom-32 -left-16 size-[28rem] rounded-full bg-white/5" aria-hidden />
         <Balloons className="absolute right-8 top-10 w-64 opacity-90" />
-        <div className="relative flex items-center gap-3">
-          <LogoMark className="size-12" />
-          <div>
-            <Wordmark light className="text-2xl" />
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary-foreground/70">{BRAND.tagline}</p>
-          </div>
+        <div className="relative w-fit rounded-2xl bg-white px-5 py-4 shadow-lg">
+          <LogoFull className="w-44" />
         </div>
         <div className="relative max-w-md space-y-5">
           <h2 className="text-3xl font-semibold leading-tight">Creamos momentos divertidos. Organízalos con tu equipo. 🎈</h2>
@@ -57,8 +53,8 @@ export function AuthLayout({ title, description, children }: { title: string; de
       </section>
       <section className="flex items-center justify-center p-6">
         <div className="w-full max-w-sm space-y-6">
-          <div className="space-y-3 lg:hidden">
-            <Logo />
+          <div className="flex justify-center lg:hidden">
+            <LogoFull className="w-52" />
           </div>
           <div className="space-y-1">
             <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
