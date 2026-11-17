@@ -10,6 +10,7 @@ import { Alert } from "@/components/ui/alert";
 import { SegmentedTabs } from "@/components/ui/tabs";
 import { EmptyState, ErrorState, FullScreenLoader, LoadingBlock } from "@/components/layout/states";
 import { EventStatusBadge, ShiftStatusBadge } from "@/components/layout/status-badges";
+import { CategoryBadge } from "@/components/layout/category-badge";
 import { ConfirmDialog } from "@/components/layout/confirm-dialog";
 import { EventForm } from "@/features/events/event-form";
 import { ShiftFormDialog, emptyShift } from "@/features/events/shift-form-dialog";
@@ -62,7 +63,7 @@ function EventDetail() {
         title={event.name}
         description={
           <span className="inline-flex flex-wrap items-center gap-2">
-            {formatISODate(event.date, { weekday: "long" })} · <EventStatusBadge status={event.status} />
+            <CategoryBadge category={event.category} /> {formatISODate(event.date, { weekday: "long" })} · <EventStatusBadge status={event.status} />
           </span>
         }
         actions={

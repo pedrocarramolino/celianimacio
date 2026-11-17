@@ -47,15 +47,8 @@ shifts ──1:1── shiftTeams
 
 Estas proyecciones se actualizan en **transacciones o lotes** (`AssignmentRepository.applyMutation`, `ShiftRepository.update/cancel`, `EventRepository.cancelCascade`).
 
-## Índices (`firestore.indexes.json`)
-| Colección | Campos | Uso |
-|---|---|---|
-| assignments | employeeId ↑, shiftEndAt ↑ | detección de solapes |
-| notifications | recipientEmployeeId ↑, createdAt ↓ | avisos del trabajador |
-| notifications | recipientRole ↑, createdAt ↓ | avisos de administración |
-| attendanceSessions | userId ↑, createdAt ↓ | historial del trabajador |
-
-El resto de consultas usan índices de un solo campo o igualdades combinadas (automáticos).
+## Índices
+La app **no necesita índices compuestos**: todas las consultas usan igualdades o un rango sobre un único campo (índices automáticos) y el orden se aplica en el cliente. `firestore.indexes.json` está vacío a propósito.
 
 ## Estados
 - Evento: `draft → scheduled → in_progress → completed`, o `cancelled` (cascada a turnos y asignaciones).

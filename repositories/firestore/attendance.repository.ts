@@ -4,7 +4,6 @@ import {
   doc,
   getDoc,
   getDocs,
-  limit,
   orderBy,
   query,
   serverTimestamp,
@@ -54,14 +53,12 @@ export class FirestoreAttendanceRepository implements AttendanceRepository {
 
   async listSessionsByUser(userId: string, max = 100) {
     const snap = await getDocs(
-      query(
-        collection(getDb(), COLLECTIONS.attendanceSessions),
-        where("userId", "==", userId),
-        orderBy("createdAt", "desc"),
-        limit(max),
-      ),
+      query(collection(getDb(), COLLECTIONS.attendanceSessions), where("userId", "==", userId)),
     );
-    return snap.docs.map((d) => mapSession(d.id, d.data()));
+    return snap.docs
+      .map((d) => mapSession(d.id, d.data()))
+      .sort((a, b) => b.shiftStartAt.getTime() - a.shiftStartAt.getTime())
+      .slice(0, max);
   }
 
   async listSessionsByEmployee(employeeId: string) {

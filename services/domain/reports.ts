@@ -31,6 +31,14 @@ export const hoursByEmployee = (s: AttendanceSession[]) =>
 
 export const hoursByEvent = (s: AttendanceSession[]) => aggregate(s, (x) => ({ key: x.eventId, label: x.eventName }));
 
+/** Horas agrupadas por tipo de evento (la etiqueta la resuelve quien llama). */
+export function hoursByCategory(
+  s: AttendanceSession[],
+  categoryOf: (eventId: string) => { key: string; label: string },
+): HoursRow[] {
+  return aggregate(s, (x) => categoryOf(x.eventId));
+}
+
 export function hoursByDay(s: AttendanceSession[], toDay: (d: Date) => string): HoursRow[] {
   return aggregate(s, (x) => {
     const d = toDay(x.shiftStartAt);

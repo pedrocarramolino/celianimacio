@@ -68,5 +68,5 @@ export const attendanceService = new AttendanceService(
   new ClientLocationValidator(),
 );
 export const notificationService = new NotificationService(repos.notifications);
-export const reportService = new ReportService(repos.attendance);
+export const reportService = new ReportService(repos.attendance, repos.events);
 export const settingsService = new SettingsService(repos.settings, repos.users, repos.audit);

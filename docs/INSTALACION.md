@@ -32,7 +32,7 @@ Edita `.firebaserc` con el ID del proyecto y despliega:
 ```bash
 npm run deploy:rules
 ```
-Los índices tardan unos minutos en construirse; mientras tanto algunas pantallas pueden mostrar "puede faltar un índice".
+No hace falta crear índices: la app solo usa los automáticos de Firestore.
 
 ## 5. Crear el primer administrador
 Sigue `docs/ROLES_Y_ACCESO.md` (opción consola o script).

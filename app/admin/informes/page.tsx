@@ -19,7 +19,7 @@ import { addDaysISO, formatDateTime, formatISODate, formatMinutes, isISODate, to
 import { downloadTextFile } from "@/utils/csv";
 import { AlertTriangle, CalendarRange, Clock, FileWarning } from "lucide-react";
 
-type Tab = "employee" | "event" | "day" | "incomplete" | "incidents";
+type Tab = "employee" | "event" | "category" | "day" | "incomplete" | "incidents";
 
 function monthStart(iso: string) {
   return `${iso.slice(0, 7)}-01`;
@@ -40,6 +40,7 @@ export default function ReportsPage() {
     const map: Record<Tab, () => [string, string]> = {
       employee: () => [`horas-por-trabajador_${suffix}.csv`, reportService.summaryCsv(d.byEmployee, "Trabajador")],
       event: () => [`horas-por-evento_${suffix}.csv`, reportService.summaryCsv(d.byEvent, "Evento")],
+      category: () => [`horas-por-tipo_${suffix}.csv`, reportService.summaryCsv(d.byCategory, "Tipo de evento")],
       day: () => [`horas-por-dia_${suffix}.csv`, reportService.summaryCsv(d.byDay, "Día")],
       incomplete: () => [`fichajes-incompletos_${suffix}.csv`, reportService.detailCsv(d.incomplete)],
       incidents: () => [`incidencias_${suffix}.csv`, reportService.detailCsv(d.withIncidents)],
@@ -105,6 +106,7 @@ export default function ReportsPage() {
             options={[
               { value: "employee", label: "Por trabajador" },
               { value: "event", label: "Por evento" },
+              { value: "category", label: "Por tipo" },
               { value: "day", label: "Por día" },
               { value: "incomplete", label: "Incompletos" },
               { value: "incidents", label: "Incidencias" },
@@ -112,6 +114,7 @@ export default function ReportsPage() {
           />
           {tab === "employee" && <HoursTable title="Horas por trabajador" label="Trabajador" rows={report.data.byEmployee} />}
           {tab === "event" && <HoursTable title="Horas por evento" label="Evento" rows={report.data.byEvent} />}
+          {tab === "category" && <HoursTable title="Horas por tipo de evento" label="Tipo" rows={report.data.byCategory} />}
           {tab === "day" && <HoursTable title="Horas por día" label="Día" rows={report.data.byDay} formatLabel={(l) => formatISODate(l, { weekday: "short" })} />}
           {tab === "incomplete" && <SessionsTable title="Fichajes incompletos" sessions={report.data.incomplete} />}
           {tab === "incidents" && <SessionsTable title="Incidencias" sessions={report.data.withIncidents} />}

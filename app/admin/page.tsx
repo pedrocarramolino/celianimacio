@@ -9,7 +9,7 @@ import { EventStatusBadge, ShiftStatusBadge, AttendanceStatusBadge } from "@/com
 import { useAsync } from "@/hooks/use-async";
 import { attendanceService, availabilityService, employeeService, eventService, shiftService } from "@/services";
 import { addDaysISO, dayRange, formatISODate, formatMinutes, formatTime, todayISO, weekDaysISO, weekStartISO } from "@/utils/dates";
-import { INCIDENT_LABELS } from "@/types";
+import { EVENT_CATEGORY_EMOJI, INCIDENT_LABELS } from "@/types";
 import { useAuth } from "@/features/auth/auth-provider";
 
 async function loadDashboard() {
@@ -88,7 +88,9 @@ export default function AdminDashboard() {
                       <li key={e.id}>
                         <Link href={`/admin/eventos/detalle/?id=${e.id}`} className="flex items-center justify-between gap-3 py-2.5 hover:text-primary">
                           <div className="min-w-0">
-                            <p className="truncate font-medium">{e.name}</p>
+                            <p className="truncate font-medium">
+                              <span aria-hidden>{EVENT_CATEGORY_EMOJI[e.category]}</span> {e.name}
+                            </p>
                             <p className="text-xs text-muted-foreground">
                               {formatISODate(e.date)} · {e.location.name} · {e.shiftCount} turno(s)
                             </p>

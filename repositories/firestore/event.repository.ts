@@ -14,6 +14,7 @@ const serialize = (i: EventInput) => ({
   location: serializeLocationSnapshot(i.location),
   instructions: i.instructions,
   status: i.status,
+  category: i.category,
 });
 
 export class FirestoreEventRepository implements EventRepository {

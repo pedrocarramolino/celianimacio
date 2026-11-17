@@ -33,6 +33,7 @@ export function eventToForm(e: CompanyEvent): EventFormValues {
     description: e.description,
     date: e.date,
     status: e.status === "cancelled" ? "scheduled" : e.status,
+    category: e.category,
     instructions: e.instructions,
     locationId: e.location.locationId ?? "",
     locationName: e.location.name,
@@ -50,6 +51,7 @@ function formToInput(values: EventFormValues): EventInput {
     description: v.description,
     date: v.date,
     status: v.status,
+    category: v.category,
     instructions: v.instructions,
     location: snapshotFromForm(v),
   };

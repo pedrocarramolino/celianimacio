@@ -72,7 +72,7 @@ function CompanyForm({ settings }: { settings: CompanySettings }) {
   });
   const { errors, isSubmitting } = form.formState;
   return (
-    <div className="grid gap-4 lg:grid-cols-[1fr_380px]">
+    <div className="max-w-3xl">
       <Card>
         <CardHeader>
           <CardTitle>Parámetros generales</CardTitle>
@@ -113,22 +113,6 @@ function CompanyForm({ settings }: { settings: CompanySettings }) {
               </Button>
             </div>
           </form>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Plan Firebase Spark</CardTitle>
-          <CardDescription>Limitaciones conocidas de esta versión</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ul className="list-disc space-y-1.5 pl-4 text-sm text-muted-foreground">
-            <li>Sin Cloud Functions: la lógica se ejecuta en el navegador y las reglas de Firestore validan permisos y estructura.</li>
-            <li>La ubicación GPS la calcula el dispositivo: no es una prueba infalible.</li>
-            <li>Notificaciones solo internas; sin correo ni push automáticos.</li>
-            <li>Sin subida de fotos (Storage requiere plan de pago en proyectos nuevos).</li>
-            <li>Cuotas gratuitas diarias de lecturas/escrituras de Firestore.</li>
-          </ul>
-          <p className="mt-3 text-xs text-muted-foreground">Detalle en docs/LIMITACIONES.md.</p>
         </CardContent>
       </Card>
     </div>

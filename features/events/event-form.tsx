@@ -9,7 +9,7 @@ import { Alert } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LocationFields } from "./location-fields";
 import { EVENT_NAME_HINT } from "@/lib/brand";
-import type { Location } from "@/types";
+import { EVENT_CATEGORIES, EVENT_CATEGORY_EMOJI, EVENT_CATEGORY_LABELS, type Location } from "@/types";
 
 export function emptyEvent(defaultRadius: number, date: string): EventFormValues {
   return {
@@ -17,6 +17,8 @@ export function emptyEvent(defaultRadius: number, date: string): EventFormValues
     description: "",
     date,
     status: "scheduled",
+    // Sin valor inicial: obliga a elegir el tipo (Zod lo valida).
+    category: "" as unknown as EventFormValues["category"],
     instructions: "",
     locationId: "",
     locationName: "",
@@ -54,10 +56,22 @@ export function EventForm({
             <FormField id="name" label="Nombre" error={errors.name?.message} hint={EVENT_NAME_HINT} required className="sm:col-span-2">
               <Input {...form.register("name")} />
             </FormField>
+            <FormField id="category" label="Tipo de evento" error={errors.category?.message} required>
+              <Select {...form.register("category")}>
+                <option value="" disabled>
+                  Elige el tipo…
+                </option>
+                {EVENT_CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {EVENT_CATEGORY_EMOJI[c]} {EVENT_CATEGORY_LABELS[c]}
+                  </option>
+                ))}
+              </Select>
+            </FormField>
             <FormField id="date" label="Fecha del evento" error={errors.date?.message} required>
               <Input type="date" {...form.register("date")} />
             </FormField>
-            <FormField id="status" label="Estado" error={errors.status?.message}>
+            <FormField id="status" label="Estado" error={errors.status?.message} className="sm:col-span-2">
               <Select {...form.register("status")}>
                 <option value="draft">Borrador</option>
                 <option value="scheduled">Programado</option>

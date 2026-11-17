@@ -72,6 +72,7 @@ async function step(name, fn) {
   await step("crear evento", async () => {
     await admin.goto(`${BASE}/admin/eventos/nuevo/`);
     await admin.getByLabel("Nombre", { exact: false }).first().fill("Boda Prueba");
+    await admin.getByLabel("Tipo de evento").selectOption("boda");
     await admin.getByLabel("Fecha del evento").fill(s.date);
     await admin.getByLabel("Instrucciones para el personal").fill("Llegar 15 minutos antes.");
     await admin.getByLabel("Nombre del lugar").fill("Masía de prueba");
@@ -179,6 +180,8 @@ async function step(name, fn) {
     await admin.goto(`${BASE}/admin/informes/`);
     await admin.getByRole("heading", { name: "Horas por trabajador" }).waitFor();
     await admin.getByRole("cell", { name: "Ana Prueba" }).waitFor();
+    await admin.getByRole("tab", { name: "Por tipo" }).click();
+    await admin.getByRole("cell", { name: /Boda/ }).waitFor();
     await admin.goto(`${BASE}/admin/`);
     await admin.getByText("Fichajes de hoy").waitFor();
     if (SHOTS) await admin.screenshot({ path: `${SHOTS}/admin-dashboard.png` });

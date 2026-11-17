@@ -10,7 +10,8 @@ import { EmptyState, ErrorState, LoadingBlock } from "@/components/layout/states
 import { EventStatusBadge } from "@/components/layout/status-badges";
 import { useAsync } from "@/hooks/use-async";
 import { eventService } from "@/services";
-import { EVENT_STATUSES, EVENT_STATUS_LABELS, type EventStatus } from "@/types";
+import { EVENT_CATEGORIES, EVENT_CATEGORY_LABELS, EVENT_STATUSES, EVENT_STATUS_LABELS, type EventCategory, type EventStatus } from "@/types";
+import { CategoryBadge } from "@/components/layout/category-badge";
 import { formatISODate, todayISO } from "@/utils/dates";
 
 export default function EventsPage() {
@@ -18,6 +19,7 @@ export default function EventsPage() {
   const [q, setQ] = useState("");
   const [when, setWhen] = useState<"upcoming" | "past" | "all">("upcoming");
   const [status, setStatus] = useState<EventStatus | "all">("all");
+  const [category, setCategory] = useState<EventCategory | "all">("all");
   const today = todayISO();
 
   const list = useMemo(() => {
@@ -25,11 +27,12 @@ export default function EventsPage() {
     const items = (data ?? []).filter(
       (e) =>
         (status === "all" || e.status === status) &&
+        (category === "all" || e.category === category) &&
         (when === "all" || (when === "upcoming" ? e.date >= today : e.date < today)) &&
         (!term || `${e.name} ${e.location.name} ${e.location.address}`.toLowerCase().includes(term)),
     );
     return when === "upcoming" ? [...items].sort((a, b) => a.date.localeCompare(b.date)) : items;
-  }, [data, q, when, status, today]);
+  }, [data, q, when, status, category, today]);
 
   return (
     <>
@@ -53,6 +56,14 @@ export default function EventsPage() {
           <option value="upcoming">Próximos</option>
           <option value="past">Pasados</option>
           <option value="all">Todos</option>
+        </Select>
+        <Select aria-label="Tipo de evento" className="sm:w-52" value={category} onChange={(e) => setCategory(e.target.value as typeof category)}>
+          <option value="all">Todos los tipos</option>
+          {EVENT_CATEGORIES.map((c) => (
+            <option key={c} value={c}>
+              {EVENT_CATEGORY_LABELS[c]}
+            </option>
+          ))}
         </Select>
         <Select aria-label="Estado" className="sm:w-44" value={status} onChange={(e) => setStatus(e.target.value as typeof status)}>
           <option value="all">Todos los estados</option>
@@ -78,6 +89,7 @@ export default function EventsPage() {
                   </div>
                   <EventStatusBadge status={e.status} />
                 </div>
+                <CategoryBadge category={e.category} />
                 <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
                   <MapPin className="size-4 shrink-0" />
                   <span className="truncate">{e.location.name}</span>

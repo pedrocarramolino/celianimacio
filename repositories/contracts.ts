@@ -18,6 +18,7 @@ import type {
   CompanySettings,
   Employee,
   EntityId,
+  EventCategory,
   EventStatus,
   Invitation,
   ISODate,
@@ -82,6 +83,7 @@ export interface EventInput {
   location: LocationSnapshot;
   instructions: string;
   status: EventStatus;
+  category: EventCategory;
 }
 
 export interface EventRepository {

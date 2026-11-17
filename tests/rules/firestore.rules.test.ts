@@ -253,6 +253,8 @@ describe("eventos, turnos y compañeros", () => {
     await assertSucceeds(addDoc(collection(db, "events"), base));
     await assertFails(addDoc(collection(db, "events"), { ...base, hacked: true }));
     await assertFails(addDoc(collection(db, "events"), { ...base, status: "inventado" }));
+    await assertSucceeds(addDoc(collection(db, "events"), { ...base, category: "comunion" }));
+    await assertFails(addDoc(collection(db, "events"), { ...base, category: "inventado" }));
   });
 });
 

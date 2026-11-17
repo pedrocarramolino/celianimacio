@@ -232,8 +232,12 @@ service cloud.firestore {
         return ['name', 'description', 'date', 'location', 'instructions', 'status', 'staffEmployeeIds',
                 'shiftCount', 'createdAt', 'updatedAt', 'createdBy'];
       }
+      // "category" es opcional para no invalidar eventos creados antes de existir el campo.
       function validEvent() {
-        return data().keys().hasOnly(eventKeys()) && data().keys().hasAll(eventKeys())
+        return data().keys().hasOnly(eventKeys().concat(['category'])) && data().keys().hasAll(eventKeys())
+          && (!('category' in data()) || data().category in ['boda', 'comunion', 'bautizo', 'cumpleanos',
+              'fiesta_infantil', 'papa_noel', 'halloween', 'fallas', 'fiesta_espuma', 'campus', 'torneo',
+              'empresa', 'otro'])
           && isStr(data().name, 1, 160)
           && isStr(data().description, 0, 4000)
           && isISODate(data().date)

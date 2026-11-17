@@ -3,8 +3,6 @@ import {
   deleteDoc,
   doc,
   getDocs,
-  limit,
-  orderBy,
   query,
   serverTimestamp,
   updateDoc,
@@ -18,6 +16,7 @@ import { getDb } from "@/lib/firebase/client";
 import { COLLECTIONS } from "@/lib/firebase/collections";
 import type { Actor, NotificationDraft, NotificationRepository } from "../contracts";
 import { mapNotification } from "./mappers";
+import type { AppNotification } from "@/types";
 
 export function notificationPayload(draft: NotificationDraft, actor: Actor) {
   return {
@@ -42,29 +41,27 @@ export function addNotifications(db: Firestore, target: WriteBatch | Transaction
   }
 }
 
+/**
+ * Las consultas usan solo filtros de igualdad (índices automáticos de Firestore) y se ordenan
+ * aquí, para no depender de índices compuestos.
+ */
+function newestFirst(list: AppNotification[]): AppNotification[] {
+  return list.sort((a, b) => (b.createdAt?.getTime() ?? Date.now()) - (a.createdAt?.getTime() ?? Date.now()));
+}
+
 export class FirestoreNotificationRepository implements NotificationRepository {
   async listForEmployee(employeeId: string, max = 50) {
     const snap = await getDocs(
-      query(
-        collection(getDb(), COLLECTIONS.notifications),
-        where("recipientEmployeeId", "==", employeeId),
-        orderBy("createdAt", "desc"),
-        limit(max),
-      ),
+      query(collection(getDb(), COLLECTIONS.notifications), where("recipientEmployeeId", "==", employeeId)),
     );
-    return snap.docs.map((d) => mapNotification(d.id, d.data()));
+    return newestFirst(snap.docs.map((d) => mapNotification(d.id, d.data()))).slice(0, max);
   }
 
   async listForAdmins(max = 50) {
     const snap = await getDocs(
-      query(
-        collection(getDb(), COLLECTIONS.notifications),
-        where("recipientRole", "==", "admin"),
-        orderBy("createdAt", "desc"),
-        limit(max),
-      ),
+      query(collection(getDb(), COLLECTIONS.notifications), where("recipientRole", "==", "admin")),
     );
-    return snap.docs.map((d) => mapNotification(d.id, d.data()));
+    return newestFirst(snap.docs.map((d) => mapNotification(d.id, d.data()))).slice(0, max);
   }
 
   async createMany(drafts: NotificationDraft[], actor: Actor) {

@@ -32,13 +32,10 @@ export class FirestoreAssignmentRepository implements AssignmentRepository {
 
   async listByEmployeeEndingAfter(employeeId: string, after: Date) {
     const snap = await getDocs(
-      query(
-        collection(getDb(), COLLECTIONS.assignments),
-        where("employeeId", "==", employeeId),
-        where("shiftEndAt", ">", ts(after)),
-      ),
+      query(collection(getDb(), COLLECTIONS.assignments), where("employeeId", "==", employeeId)),
     );
-    return snap.docs.map((d) => mapAssignment(d.id, d.data()));
+    // Filtro por fecha en cliente: evita depender de un índice compuesto (employeeId + shiftEndAt).
+    return snap.docs.map((d) => mapAssignment(d.id, d.data())).filter((a) => a.shiftEndAt.getTime() > after.getTime());
   }
 
   async listInRange(from: Date, to: Date) {
