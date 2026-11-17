@@ -8,6 +8,7 @@ export const NOTIFICATION_TYPES = [
   "event_reminder",
   "availability_request",
   "attendance_incident",
+  "assignment_response",
   "general",
 ] as const;
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
@@ -20,6 +21,7 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   event_reminder: "Recordatorio de evento",
   availability_request: "Solicitud de disponibilidad",
   attendance_incident: "Incidencia de fichaje",
+  assignment_response: "Respuesta a asignación",
   general: "Aviso",
 };
 

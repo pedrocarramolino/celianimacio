@@ -9,6 +9,15 @@ export const ASSIGNMENT_STATUS_LABELS: Record<AssignmentStatus, string> = {
   cancelled: "Cancelada",
 };
 
+export const WORKER_RESPONSES = ["pending", "accepted", "declined"] as const;
+export type WorkerResponse = (typeof WORKER_RESPONSES)[number];
+
+export const WORKER_RESPONSE_LABELS: Record<WorkerResponse, string> = {
+  pending: "Sin respuesta",
+  accepted: "Ha dicho que sí",
+  declined: "Ha dicho que no",
+};
+
 /** assignments/{shiftId}_{employeeId} — id determinista: evita duplicados por diseño. */
 export interface Assignment extends AuditFields {
   id: EntityId;
@@ -23,6 +32,11 @@ export interface Assignment extends AuditFields {
   shiftEndAt: Date;
   status: AssignmentStatus;
   cancelledReason: string;
+  /** Transporte / cómo llega el monitor (lo indica administración). */
+  transport: string;
+  /** Respuesta del propio trabajador a la asignación. */
+  workerResponse: WorkerResponse;
+  responseAt: Date | null;
 }
 
 export interface AssignmentConflict {

@@ -10,6 +10,8 @@ import { ErrorState, LoadingBlock, EmptyState } from "@/components/layout/states
 import { AssignmentStatusBadge, ShiftStatusBadge } from "@/components/layout/status-badges";
 import { ConfirmDialog } from "@/components/layout/confirm-dialog";
 import { Avatar } from "@/features/employees/avatar";
+import { ResponseBadge } from "./response-badge";
+import { TransportEditor } from "./transport-editor";
 import { useAsync } from "@/hooks/use-async";
 import { assignmentService } from "@/services";
 import type { CandidateInfo } from "@/services/assignment.service";
@@ -59,16 +61,18 @@ export function AssignmentPanel({ shift, onChanged }: { shift: Shift; onChanged:
     const blocked = c.conflicts.length > 0 && !status;
     return (
       <li key={c.employee.id} className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex min-w-0 items-center gap-3">
+        <div className="flex min-w-0 flex-1 items-start gap-3">
           <Avatar name={employeeFullName(c.employee)} photoURL={c.employee.photoURL} />
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="truncate font-medium">{employeeFullName(c.employee)}</p>
             <div className="mt-1 flex flex-wrap items-center gap-1.5">
               {c.employee.position && <span className="text-xs text-muted-foreground">{c.employee.position}</span>}
               <Badge variant={availabilityTone[c.availability]}>{AVAILABILITY_MATCH_LABELS[c.availability]}</Badge>
               {status && <AssignmentStatusBadge status={status} />}
+              {status && c.assignment && <ResponseBadge response={c.assignment.workerResponse} />}
               {c.employee.status !== "active" && <Badge variant="neutral">Inactivo</Badge>}
             </div>
+            {status && c.assignment && <TransportEditor assignment={c.assignment} onSaved={() => void candidates.reload()} />}
             {c.conflicts.map((x) => (
               <p key={x.assignmentId} className="mt-1 flex items-center gap-1 text-xs text-destructive">
                 <AlertTriangle className="size-3" /> Solapa con {x.eventName} · {x.shiftName} ({shiftWhen(x)})

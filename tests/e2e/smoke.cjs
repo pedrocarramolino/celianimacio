@@ -114,6 +114,10 @@ async function step(name, fn) {
     await admin.getByText("Ana Prueba").first().waitFor();
     await admin.getByRole("button", { name: "Confirmar" }).first().click();
     await admin.getByText("1/2 confirmados").waitFor();
+    await admin.getByText("Sin respuesta").first().waitFor();
+    await admin.getByLabel("Transporte de Ana Prueba").fill("Berlingo con Sara");
+    await admin.getByRole("button", { name: "Guardar" }).click();
+    await admin.getByLabel("Guardado").waitFor();
     if (SHOTS) await admin.screenshot({ path: `${SHOTS}/admin-asignaciones.png` });
   });
 
@@ -150,6 +154,15 @@ async function step(name, fn) {
     await worker.getByText("Pendiente de pago").first().waitFor();
     await worker.getByText(/787/).first().waitFor();
     if (SHOTS) await worker.screenshot({ path: `${SHOTS}/trabajador-inicio.png` });
+  });
+
+  await step("el trabajador ve el transporte y responde Sí", async () => {
+    await worker.getByText("Berlingo con Sara").first().waitFor();
+    await worker.getByRole("button", { name: "Sí, voy" }).click();
+    await worker.getByText("Has confirmado que vas").waitFor();
+    await admin.goto(`${BASE}/admin/notificaciones/`);
+    await admin.getByText("Ana Prueba va a Boda Prueba").first().waitFor();
+    await admin.goBack();
   });
 
   await step("disponibilidad semanal", async () => {

@@ -167,6 +167,9 @@ export interface AssignmentRepository {
   /** Asignaciones del empleado cuyo fin es posterior a `after` (para detectar solapes). */
   listByEmployeeEndingAfter(employeeId: EntityId, after: Date): Promise<Assignment[]>;
   listInRange(from: Date, to: Date): Promise<Assignment[]>;
+  setTransport(id: EntityId, transport: string): Promise<void>;
+  /** Respuesta del trabajador (Sí/No) + aviso a administración, en un mismo lote. */
+  respond(id: EntityId, response: "accepted" | "declined", notification: NotificationDraft, actor: Actor): Promise<void>;
   /** Transacción: asignación + proyecciones en turno, evento y equipo + notificación. */
   applyMutation(mutation: AssignmentMutation, actor: Actor): Promise<void>;
 }

@@ -1,7 +1,7 @@
-import { collection, doc, getDoc, getDocs, query, runTransaction, serverTimestamp, where } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, runTransaction, serverTimestamp, updateDoc, where, writeBatch } from "firebase/firestore";
 import { getDb } from "@/lib/firebase/client";
 import { assignmentId, COLLECTIONS } from "@/lib/firebase/collections";
-import type { Actor, AssignmentMutation, AssignmentRepository } from "../contracts";
+import type { Actor, AssignmentMutation, AssignmentRepository, NotificationDraft } from "../contracts";
 import { mapAssignment, mapEvent, mapShift, mapShiftTeam, ts } from "./mappers";
 import { notificationPayload } from "./notification.repository";
 import { computeShiftStatus, projectEventStaff, projectShiftMembership } from "@/services/domain/assignment-rules";
@@ -49,6 +49,18 @@ export class FirestoreAssignmentRepository implements AssignmentRepository {
     return snap.docs.map((d) => mapAssignment(d.id, d.data()));
   }
 
+  async setTransport(id: string, transport: string) {
+    await updateDoc(doc(getDb(), COLLECTIONS.assignments, id), { transport: transport.trim().slice(0, 200), updatedAt: serverTimestamp() });
+  }
+
+  async respond(id: string, response: "accepted" | "declined", notification: NotificationDraft, actor: Actor) {
+    const db = getDb();
+    const batch = writeBatch(db);
+    batch.update(doc(db, COLLECTIONS.assignments, id), { workerResponse: response, responseAt: serverTimestamp() });
+    batch.set(doc(collection(db, COLLECTIONS.notifications)), notificationPayload(notification, actor));
+    await batch.commit();
+  }
+
   /**
    * Transacción cliente (disponible en Spark). Lee el estado actual del turno, del evento y
    * del equipo para que dos administradores simultáneos no sobrescriban sus cambios.
@@ -86,8 +98,12 @@ export class FirestoreAssignmentRepository implements AssignmentRepository {
       }
       const nextShiftStatus = computeShiftStatus(shift.status, membership.confirmedEmployeeIds.length, shift.requiredWorkers);
 
+      const previous = assignmentSnap.exists() ? mapAssignment(assignmentSnap.id, assignmentSnap.data()) : null;
+      // Una reactivación (desde cancelada) vuelve a pedir respuesta al trabajador.
+      const resetResponse = previous?.status === "cancelled" && m.nextStatus !== "cancelled";
       if (assignmentSnap.exists()) {
         tx.update(assignmentRef, {
+          ...(resetResponse ? { workerResponse: "pending", responseAt: null } : {}),
           status: m.nextStatus,
           cancelledReason: m.nextStatus === "cancelled" ? m.cancelledReason.slice(0, 500) : "",
           employeeName: m.employeeName,
@@ -109,6 +125,9 @@ export class FirestoreAssignmentRepository implements AssignmentRepository {
           shiftEndAt: ts(shift.endAt),
           status: m.nextStatus,
           cancelledReason: "",
+          transport: "",
+          workerResponse: "pending",
+          responseAt: null,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
           createdBy: actor.uid,

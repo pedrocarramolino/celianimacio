@@ -253,6 +253,14 @@ describe("eventos, turnos y compañeros", () => {
     );
     await assertFails(updateDoc(doc(workerCtx(), "shifts", "sh1"), { staffEmployeeIds: ["empA", "empB"] }));
   });
+  test("el trabajador responde Sí/No a su asignación y no puede tocar nada más", async () => {
+    await assertSucceeds(updateDoc(doc(workerCtx(), "assignments", "sh1_empA"), { workerResponse: "accepted", responseAt: serverTimestamp() }));
+    await assertSucceeds(updateDoc(doc(workerCtx(), "assignments", "sh1_empA"), { workerResponse: "declined", responseAt: serverTimestamp() }));
+    await assertFails(updateDoc(doc(workerCtx(), "assignments", "sh1_empA"), { status: "cancelled", workerResponse: "declined", responseAt: serverTimestamp() }));
+    await assertFails(updateDoc(doc(workerCtx(), "assignments", "sh1_empA"), { transport: "Coche propio" }));
+    await assertFails(updateDoc(doc(workerCtx(OTHER, "bru@example.com"), "assignments", "sh1_empA"), { workerResponse: "accepted", responseAt: serverTimestamp() }));
+    await assertSucceeds(updateDoc(doc(adminCtx(), "assignments", "sh1_empA"), { transport: "Berlingo con Sara", updatedAt: serverTimestamp() }));
+  });
   test("el trabajador consulta solo sus asignaciones", async () => {
     await assertSucceeds(getDocs(query(collection(workerCtx(), "assignments"), where("employeeId", "==", "empA"))));
     await assertFails(getDocs(query(collection(workerCtx(), "assignments"), where("employeeId", "==", "empB"))));

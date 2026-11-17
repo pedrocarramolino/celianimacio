@@ -7,7 +7,7 @@ import { canTransition, findConflicts, isActiveAssignment } from "./domain/assig
 import { matchShiftAvailability, type AvailabilityMatch } from "./domain/availability-rules";
 import { notificationTemplates } from "./notification.service";
 import { shiftWhen } from "./shift.service";
-import { requireAdmin, requireEmployeeId } from "./session";
+import { requireActor, requireAdmin, requireEmployeeId } from "./session";
 
 export interface CandidateInfo {
   employee: Employee;
@@ -124,7 +124,24 @@ export class AssignmentService {
     );
   }
 
+  async setTransport(assignment: Assignment, transport: string): Promise<void> {
+    const actor = requireAdmin();
+    await this.assignments.setTransport(assignment.id, transport);
+    await this.audit.log({ action: "assignment.transport", entityType: "assignment", entityId: assignment.id, summary: `${assignment.employeeName}: ${transport}` }, actor);
+  }
+
   // ---- Portal del trabajador
+
+  /** El trabajador responde Sí/No a su asignación; se avisa a administración. */
+  async respond(assignment: Assignment, response: "accepted" | "declined"): Promise<void> {
+    const actor = requireActor();
+    const employeeId = requireEmployeeId();
+    if (assignment.employeeId !== employeeId) throw new AppError("Solo puedes responder a tus asignaciones.");
+    if (assignment.status === "cancelled") throw new AppError("Esta asignación está cancelada.");
+    if (assignment.shiftEndAt.getTime() < Date.now()) throw new AppError("El turno ya ha terminado.");
+    const when = shiftWhen({ startAt: assignment.shiftStartAt, endAt: assignment.shiftEndAt });
+    await this.assignments.respond(assignment.id, response, notificationTemplates.assignmentResponse(assignment.employeeName, assignment.eventName, when, response === "accepted"), actor);
+  }
   async listMine(): Promise<Assignment[]> {
     return this.assignments.listByEmployee(requireEmployeeId());
   }

@@ -384,8 +384,12 @@ service cloud.firestore {
         return ['shiftId', 'eventId', 'employeeId', 'employeeName', 'eventName', 'shiftName', 'shiftStartAt',
                 'shiftEndAt', 'status', 'cancelledReason', 'createdAt', 'updatedAt', 'createdBy'];
       }
+      // transport / workerResponse / responseAt son opcionales (asignaciones antiguas no los tienen).
       function validAssignment() {
-        return data().keys().hasOnly(assignmentKeys()) && data().keys().hasAll(assignmentKeys())
+        return data().keys().hasOnly(assignmentKeys().concat(['transport', 'workerResponse', 'responseAt']))
+          && data().keys().hasAll(assignmentKeys())
+          && data().get('transport', '') is string && data().get('transport', '').size() <= 200
+          && data().get('workerResponse', 'pending') in ['pending', 'accepted', 'declined']
           && assignmentId == data().shiftId + '_' + data().employeeId
           && isStr(data().eventId, 1, 128)
           && isStr(data().employeeName, 1, 200)
@@ -402,6 +406,13 @@ service cloud.firestore {
         && exists(docPath('employees', data().employeeId));
       allow update: if isAdmin() && validAssignment() && updatedNow() && keepsCreation()
         && data().shiftId == prev().shiftId && data().employeeId == prev().employeeId;
+
+      // El propio trabajador responde Sí/No. No puede tocar nada más (ni el estado ni el transporte).
+      allow update: if hasEmployee() && prev().employeeId == myEmployeeId()
+        && prev().status != 'cancelled'
+        && changedKeys().hasOnly(['workerResponse', 'responseAt'])
+        && data().workerResponse in ['accepted', 'declined']
+        && data().responseAt == request.time;
       allow delete: if false;
     }
 
@@ -563,7 +574,8 @@ service cloud.firestore {
       function validNotification() {
         return data().keys().hasOnly(notificationKeys()) && data().keys().hasAll(notificationKeys())
           && data().type in ['assignment_new', 'assignment_cancelled', 'schedule_changed', 'event_cancelled',
-                             'event_reminder', 'availability_request', 'attendance_incident', 'general']
+                             'event_reminder', 'availability_request', 'attendance_incident',
+                             'assignment_response', 'general']
           && isStr(data().title, 1, 160)
           && isStr(data().body, 0, 2000)
           && isStrOrNull(data().link, 300)
@@ -582,7 +594,7 @@ service cloud.firestore {
 
       allow create: if validNotification() && (
         isAdmin()
-        || (isWorker() && data().type == 'attendance_incident' && data().recipientRole == 'admin')
+        || (isWorker() && data().type in ['attendance_incident', 'assignment_response'] && data().recipientRole == 'admin')
       );
 
       // El destinatario solo puede marcarla como leída.

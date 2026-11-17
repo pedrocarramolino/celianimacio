@@ -114,6 +114,14 @@ export const notificationTemplates = {
     recipientEmployeeId: employeeId,
     recipientRole: null,
   }),
+  assignmentResponse: (employeeName: string, eventName: string, when: string, accepted: boolean): NotificationDraft => ({
+    type: "assignment_response",
+    title: accepted ? `✅ ${employeeName} va a ${eventName}` : `❌ ${employeeName} no puede ir a ${eventName}`,
+    body: `Turno del ${when}.${accepted ? "" : " Busca a otra persona en Asignaciones."}`,
+    link: "/admin/asignaciones/",
+    recipientEmployeeId: null,
+    recipientRole: "admin",
+  }),
   attendanceIncident: (employeeName: string, eventName: string, detail: string): NotificationDraft => ({
     type: "attendance_incident",
     title: `Incidencia de fichaje: ${employeeName}`,

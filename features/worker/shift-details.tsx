@@ -9,6 +9,7 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { LoadingBlock } from "@/components/layout/states";
 import { EventSheetView } from "@/features/events/event-sheet-view";
+import { AssignmentResponse } from "./assignment-response";
 
 /**
  * Detalle de un turno para el trabajador asignado: horario, dirección, instrucciones y
@@ -57,6 +58,7 @@ export function WorkerShiftDetails({ assignment }: { assignment: Assignment }) {
           </div>
         </div>
       </div>
+      <AssignmentResponse assignment={assignment} />
       <div className="rounded-lg border p-3">
         <EventSheetView event={event} />
       </div>

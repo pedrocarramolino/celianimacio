@@ -1,6 +1,7 @@
 import { Timestamp, type DocumentData } from "firebase/firestore";
 import {
   ASSIGNMENT_STATUSES,
+  WORKER_RESPONSES,
   ATTENDANCE_STATUSES,
   DAY_AVAILABILITY_STATUSES,
   EMPLOYEE_STATUSES,
@@ -230,6 +231,9 @@ export function mapAssignment(id: string, d: DocumentData): Assignment {
     shiftEndAt: toDateStrict(d.shiftEndAt),
     status: oneOf(d.status, ASSIGNMENT_STATUSES, "cancelled"),
     cancelledReason: str(d, "cancelledReason"),
+    transport: str(d, "transport"),
+    workerResponse: oneOf(d.workerResponse, WORKER_RESPONSES, "pending"),
+    responseAt: toDate(d.responseAt),
     ...audit(d),
   };
 }
