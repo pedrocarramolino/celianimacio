@@ -79,7 +79,8 @@ export function AppShell({ nav, root, children }: { nav: NavItem[]; root: string
   return (
     <div className="min-h-dvh lg:pl-64">
       {/* Barra lateral escritorio */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col gap-6 border-r bg-card p-4 lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col gap-6 border-r bg-card p-4 pt-5 lg:flex">
+        <div className="brand-stripe absolute inset-x-0 top-0" aria-hidden />
         <Logo subtitle={session?.role === "admin" ? "Administración" : "Portal del trabajador"} />
         <div className="flex-1 overflow-y-auto">{links}</div>
         {userBox}
@@ -87,6 +88,7 @@ export function AppShell({ nav, root, children }: { nav: NavItem[]; root: string
 
       {/* Cabecera móvil */}
       <header className="sticky top-0 z-30 flex items-center justify-between border-b bg-card/95 px-4 py-2.5 backdrop-blur lg:hidden">
+        <div className="brand-stripe absolute inset-x-0 top-0" aria-hidden />
         <Logo />
         <Button variant="ghost" size="icon" aria-label="Abrir menú" aria-expanded={open} onClick={() => setOpen(true)}>
           <Menu />
@@ -95,7 +97,7 @@ export function AppShell({ nav, root, children }: { nav: NavItem[]; root: string
 
       {open && (
         <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true" aria-label="Menú">
-          <button className="absolute inset-0 bg-[#0b2226]/40" aria-label="Cerrar menú" onClick={() => setOpen(false)} />
+          <button className="absolute inset-0 bg-[#0f2240]/40" aria-label="Cerrar menú" onClick={() => setOpen(false)} />
           <div className="absolute inset-y-0 right-0 flex w-72 flex-col gap-6 bg-card p-4 shadow-xl">
             <div className="flex items-center justify-between">
               <Logo />

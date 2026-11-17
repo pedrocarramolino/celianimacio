@@ -64,8 +64,8 @@ export default function AdminDashboard() {
               icon={CalendarClock}
               tone={data.pendingShifts.length ? "warning" : "success"}
             />
-            <StatCard label="Disponibles hoy" value={data.availableToday} hint="Según disponibilidad declarada" icon={UserCheck} />
-            <StatCard label="Horas esta semana" value={formatMinutes(data.weekMinutes)} hint="Jornadas cerradas" icon={Clock} />
+            <StatCard label="Disponibles hoy" value={data.availableToday} hint="Según disponibilidad declarada" icon={UserCheck} tone="sky" />
+            <StatCard label="Horas esta semana" value={formatMinutes(data.weekMinutes)} hint="Jornadas cerradas" icon={Clock} tone="orange" />
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">

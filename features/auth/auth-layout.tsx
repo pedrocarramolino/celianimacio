@@ -24,7 +24,7 @@ function Balloons({ className }: { className?: string }) {
 export function AuthLayout({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
   return (
     <main className="grid min-h-dvh lg:grid-cols-2">
-      <section className="relative hidden overflow-hidden bg-primary p-12 text-primary-foreground lg:flex lg:flex-col lg:justify-between">
+      <section className="relative hidden overflow-hidden bg-gradient-to-br from-primary via-[#2a82d6] to-brand-sky p-12 text-primary-foreground lg:flex lg:flex-col lg:justify-between">
         <div className="absolute -right-24 -top-24 size-96 rounded-full bg-white/5" aria-hidden />
         <div className="absolute -bottom-32 -left-16 size-[28rem] rounded-full bg-white/5" aria-hidden />
         <Balloons className="absolute right-8 top-10 w-64 opacity-90" />
@@ -45,10 +45,7 @@ export function AuthLayout({ title, description, children }: { title: string; de
           </ul>
         </div>
         <p className="relative text-sm text-primary-foreground/60">
-          {BRAND.area} · Acceso privado para el equipo ·{" "}
-          <a href={BRAND.website} target="_blank" rel="noopener noreferrer" className="underline-offset-2 hover:underline">
-            animacionvalencia.es
-          </a>
+          Acceso privado para el equipo
         </p>
       </section>
       <section className="flex items-center justify-center p-6">

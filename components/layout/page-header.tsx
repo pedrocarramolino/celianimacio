@@ -33,13 +33,15 @@ export function StatCard({
   value: React.ReactNode;
   hint?: string;
   icon: React.ComponentType<{ className?: string }>;
-  tone?: "default" | "warning" | "danger" | "success";
+  tone?: "default" | "warning" | "danger" | "success" | "orange" | "sky";
 }) {
   const toneCls = {
     default: "bg-primary-soft text-primary",
     warning: "bg-warning-soft text-warning",
     danger: "bg-danger-soft text-destructive",
     success: "bg-success-soft text-success",
+    orange: "bg-accent text-accent-foreground",
+    sky: "bg-primary-soft text-brand-sky",
   }[tone];
   return (
     <div className="rounded-xl border bg-card p-4">

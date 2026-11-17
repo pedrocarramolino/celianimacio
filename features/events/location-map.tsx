@@ -42,12 +42,12 @@ export function LocationMap({
       }).addTo(m);
       const icon = L.divIcon({
         className: "",
-        html: '<div style="width:22px;height:22px;border-radius:9999px;background:#0e5a5f;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>',
+        html: '<div style="width:22px;height:22px;border-radius:9999px;background:#1d6bbf;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>',
         iconSize: [22, 22],
         iconAnchor: [11, 11],
       });
       marker.current = L.marker(center, { draggable: true, icon, opacity: has ? 1 : 0 }).addTo(m);
-      circle.current = L.circle(center, { radius: radiusMeters, color: "#0e5a5f", weight: 1, fillOpacity: has ? 0.12 : 0, opacity: has ? 1 : 0 }).addTo(m);
+      circle.current = L.circle(center, { radius: radiusMeters, color: "#1d6bbf", weight: 1, fillOpacity: has ? 0.12 : 0, opacity: has ? 1 : 0 }).addTo(m);
       marker.current.on("dragend", () => {
         const p = marker.current!.getLatLng();
         pickRef.current(p.lat, p.lng);
