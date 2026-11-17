@@ -51,6 +51,13 @@ Esto ejecuta `next build` (exportación estática a `out/`) y `firebase deploy -
 
 Después, en **Authentication → Configuración → Dominios autorizados**, comprueba que aparece tu dominio de Hosting (y añade tu dominio propio si lo usas).
 
+## 7 bis. Alternativa: desplegar en Vercel (plan Hobby gratuito)
+La app es estática, así que Vercel la sirve sin funciones de servidor.
+1. Importa el repositorio en Vercel (framework detectado: Next.js; `vercel.json` añade las cabeceras de seguridad).
+2. En *Settings → Environment Variables* añade las mismas `NEXT_PUBLIC_FIREBASE_*` de `.env.local` (Production y Preview) y vuelve a desplegar: se incrustan al compilar.
+3. En Firebase → *Authentication → Configuración → Dominios autorizados* añade el dominio `*.vercel.app` asignado (p. ej. `celianimacio.vercel.app`); sin esto fallan el login y los enlaces de correo.
+4. Las reglas e índices se siguen publicando con `npm run deploy:rules`.
+
 ## 8. Puesta en marcha
 1. Configuración → Empresa: radio por defecto, precisión GPS máxima, margen de fichaje.
 2. Configuración → Ubicaciones: guarda los espacios habituales.
