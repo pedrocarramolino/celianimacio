@@ -1,0 +1,110 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+
+/* Identidad visual Cel i Animació: verde petróleo, blanco, grises neutros */
+:root {
+  --radius: 0.85rem;
+  --background: #f6f8f8;
+  --foreground: #14252a;
+  --card: #ffffff;
+  --card-foreground: #14252a;
+  --primary: #0e5a5f;
+  --primary-hover: #0a474b;
+  --primary-foreground: #ffffff;
+  --primary-soft: #e3f0f0;
+  --secondary: #eef2f2;
+  --secondary-foreground: #1f3a40;
+  --muted: #eef2f2;
+  --muted-foreground: #5d7176;
+  --accent: #d9ecea;
+  --accent-foreground: #0e5a5f;
+  --border: #dde5e6;
+  --input: #cfdadb;
+  --ring: #0e5a5f;
+  --destructive: #c2412d;
+  --destructive-foreground: #ffffff;
+  --success: #2f7d4f;
+  --success-soft: #e4f3ea;
+  --warning: #a86a0c;
+  --warning-soft: #fbf0dc;
+  --danger-soft: #fbe7e3;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger-soft: var(--danger-soft);
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 3px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Impresión / "Guardar como PDF" desde el navegador */
+@media print {
+  aside,
+  header,
+  nav,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+  main {
+    padding: 0 !important;
+    max-width: none !important;
+  }
+  .lg\:pl-64 {
+    padding-left: 0 !important;
+  }
+  .print-break {
+    break-inside: avoid;
+  }
+}
